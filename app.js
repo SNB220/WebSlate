@@ -28,6 +28,9 @@ const customExtension = document.getElementById("customExtension");
 const downloadModal = document.getElementById("downloadModal");
 const downloadFileName = document.getElementById("downloadFileName");
 const aboutModal = document.getElementById("aboutModal");
+const sidebar = document.getElementById("sidebar");
+const collapseSidebarButton = document.getElementById("collapseSidebarButton");
+const reopenSidebarButton = document.getElementById("reopenSidebarButton");
 let pendingCloseIndex = -1;
 
 function saveWorkspace() {
@@ -181,6 +184,15 @@ function showToast(message) {
   clearTimeout(showToast.timer);
   showToast.timer = setTimeout(() => toast.classList.remove("show"), 2200);
 }
+
+function setSidebarCollapsed(collapsed) {
+  sidebar.classList.toggle("hidden", collapsed);
+  reopenSidebarButton.classList.toggle("hidden", !collapsed);
+  collapseSidebarButton.setAttribute("aria-label", collapsed ? "Collapse Explorer" : "Collapse Explorer");
+}
+
+collapseSidebarButton.addEventListener("click", () => setSidebarCollapsed(true));
+reopenSidebarButton.addEventListener("click", () => setSidebarCollapsed(false));
 
 function markdownToHtml(markdown) {
   return markdown
