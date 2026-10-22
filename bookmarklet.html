@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Install the WebSlate bookmarklet." />
+    <title>Install WebSlate bookmarklet</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      body { overflow: auto; }
+      .install-page { min-height: 100vh; display: grid; place-items: center; padding: 32px 18px; }
+      .install-card { width: min(620px, 100%); padding: 36px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel); box-shadow: 0 20px 60px #00000033; }
+      .install-mark { width: 48px; height: 48px; display: grid; place-items: center; margin-bottom: 22px; border-radius: 12px; color: #08110e; background: var(--accent); font-size: 28px; font-weight: 800; }
+      .install-card h1 { margin: 0 0 10px; color: var(--text); font-size: 28px; }
+      .install-card p, .install-card li { color: var(--soft); line-height: 1.65; }
+      .install-card ol { padding-left: 22px; }
+      .bookmarklet { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; margin: 14px 0 8px; padding: 0 18px; border-radius: 6px; color: #08110e; background: var(--accent); font-weight: 700; text-decoration: none; }
+      .bookmarklet:hover { background: var(--accent-bright); }
+      .copy-row { display: flex; gap: 8px; margin-top: 10px; }
+      .copy-row input { min-width: 0; flex: 1; padding: 9px 10px; border: 1px solid var(--border); border-radius: 5px; color: var(--muted); background: var(--editor); font: 11px Consolas, monospace; }
+      .copy-row button { padding: 0 13px; border-radius: 5px; color: var(--text); background: var(--panel-raised); }
+      .copy-row button:hover { background: #22313d; }
+      .install-back { display: inline-block; margin-top: 24px; color: var(--accent-bright); text-decoration: none; }
+      .install-note { color: var(--muted) !important; font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <main class="install-page">
+      <section class="install-card">
+        <div class="install-mark">S</div>
+        <h1>Install WebSlate</h1>
+        <p>Keep a calm writing and coding workspace one click away from GitHub or any other page.</p>
+        <ol>
+          <li>Show your browser's bookmarks bar.</li>
+          <li>Drag the green <strong>WebSlate bookmarklet</strong> button onto it.</li>
+          <li>Click that bookmark whenever you want to open WebSlate.</li>
+        </ol>
+        <a class="bookmarklet" id="bookmarklet" href="javascript:(()=>{window.open('https://snb220.github.io/WebSlate/','_blank','noopener');})();">WebSlate bookmarklet</a>
+        <div class="copy-row">
+          <input id="bookmarkletCode" readonly aria-label="Bookmarklet URL" />
+          <button id="copyButton" type="button">Copy URL</button>
+        </div>
+        <p class="install-note">If dragging is unavailable, copy the URL above, create a new bookmark, and paste it into the bookmark's URL field. Your files stay in this browser.</p>
+        <a class="install-back" href="index.html">← Back to WebSlate</a>
+      </section>
+    </main>
+    <script>
+      const bookmarklet = document.getElementById("bookmarklet");
+      const code = bookmarklet.href;
+      const codeInput = document.getElementById("bookmarkletCode");
+      const copyButton = document.getElementById("copyButton");
+      codeInput.value = code;
+      copyButton.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(code);
+          copyButton.textContent = "Copied";
+          setTimeout(() => { copyButton.textContent = "Copy URL"; }, 1600);
+        } catch (error) {
+          codeInput.select();
+          copyButton.textContent = "Select and copy";
+        }
+      });
+    </script>
+  </body>
+</html>
