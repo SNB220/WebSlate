@@ -46,11 +46,13 @@
           </button>
         </aside>
 
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
           <div class="sidebar-heading">
             <span>Explorer</span>
-            <div class="new-file-control">
-              <button class="plain-icon" id="newFileButton" title="New file" aria-label="New file" aria-expanded="false">＋</button>
+            <div class="sidebar-actions">
+              <button class="plain-icon collapse-button" id="collapseSidebarButton" title="Collapse Explorer" aria-label="Collapse Explorer">‹</button>
+              <div class="new-file-control">
+                <button class="plain-icon" id="newFileButton" title="New file" aria-label="New file" aria-expanded="false">＋</button>
               <div class="new-file-menu hidden" id="newFileMenu" role="menu">
                 <div class="new-file-title">New file</div>
                 <label class="new-file-name-label" for="newFileName">File name</label>
@@ -63,6 +65,7 @@
                   <span class="custom-extension-label">Custom</span>
                   <input id="customExtension" type="text" maxlength="12" placeholder="ext" aria-label="Custom extension" />
                   <button id="createCustomFile" title="Create custom file">Create</button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -74,6 +77,7 @@
             <span>All changes saved</span>
           </div>
         </aside>
+        <button class="sidebar-reopen hidden" id="reopenSidebarButton" title="Open Explorer" aria-label="Open Explorer">›</button>
 
         <section class="editor-area">
           <div class="tabs" id="tabs"></div>
