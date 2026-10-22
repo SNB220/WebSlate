@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Slate is a focused, browser-based writing and coding workspace." />
+    <title>Slate — Write. Build. Ship.</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark">S</div>
+          <span>Slate</span>
+        </div>
+        <nav class="top-nav" aria-label="Workspace navigation">
+          <button class="top-nav-item active">Workspace</button>
+          <button class="top-nav-item">Extensions</button>
+        </nav>
+        <div class="top-actions">
+          <button class="icon-button" id="searchButton" title="Search files" aria-label="Search files">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.5"></circle><path d="m16 16 5 5"></path></svg>
+          </button>
+          <button class="icon-button" title="Settings" aria-label="Settings">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.7a3.3 3.3 0 1 0 0 6.6 3.3 3.3 0 0 0 0-6.6Z"></path><path d="m19.4 15 .1.1a1.8 1.8 0 0 1-2.5 2.5l-.1-.1a1.8 1.8 0 0 0-3.1 1.3v.2a1.8 1.8 0 0 1-3.6 0v-.2a1.8 1.8 0 0 0-3.1-1.3l-.1.1a1.8 1.8 0 1 1-2.5-2.5l.1-.1a1.8 1.8 0 0 0-1.3-3.1h-.2a1.8 1.8 0 0 1 0-3.6h.2A1.8 1.8 0 0 0 4.6 5l-.1-.1A1.8 1.8 0 1 1 7 2.4l.1.1a1.8 1.8 0 0 0 3.1-1.3V1a1.8 1.8 0 0 1 3.6 0v.2A1.8 1.8 0 0 0 17 2.5l.1-.1a1.8 1.8 0 1 1 2.5 2.5l-.1.1a1.8 1.8 0 0 0 1.3 3.1h.2a1.8 1.8 0 0 1 0 3.6h-.2a1.8 1.8 0 0 0-1.4 3.3Z" transform="scale(.9) translate(1.3 1.3)"></path></svg>
+          </button>
+          <button class="avatar" title="Account">NK</button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <aside class="activity-bar" aria-label="Activity bar">
+          <button class="activity-item active" title="Explorer" aria-label="Explorer">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4.5h6l2 2h8v13H4z"></path><path d="M4 8h16"></path></svg>
+          </button>
+          <button class="activity-item" title="Search" aria-label="Search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 4.5 4.5"></path></svg>
+          </button>
+          <button class="activity-item" title="Source control" aria-label="Source control">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="2.5"></circle><circle cx="18" cy="6" r="2.5"></circle><circle cx="18" cy="18" r="2.5"></circle><path d="M8.5 6h7M6 8.5v5a4.5 4.5 0 0 0 4.5 4.5H15"></path></svg>
+          </button>
+          <div class="activity-spacer"></div>
+          <button class="activity-item" title="Help" aria-label="Help">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.7 9a2.4 2.4 0 1 1 4 1.8c-1.1.8-1.7 1.3-1.7 2.7M12 17.5h.01"></path></svg>
+          </button>
+        </aside>
+
+        <aside class="sidebar">
+          <div class="sidebar-heading">
+            <span>Explorer</span>
+            <div class="new-file-control">
+              <button class="plain-icon" id="newFileButton" title="New file" aria-label="New file" aria-expanded="false">＋</button>
+              <div class="new-file-menu hidden" id="newFileMenu" role="menu">
+                <div class="new-file-title">New file</div>
+                <label class="new-file-name-label" for="newFileName">File name</label>
+                <input id="newFileName" class="new-file-name" type="text" maxlength="80" value="untitled" placeholder="e.g. app" />
+                <button class="file-type-option" data-extension="md" role="menuitem"><span class="file-icon markdown">M</span> Markdown <span>.md</span></button>
+                <button class="file-type-option" data-extension="js" role="menuitem"><span class="file-icon javascript">JS</span> JavaScript <span>.js</span></button>
+                <button class="file-type-option" data-extension="css" role="menuitem"><span class="file-icon css">#</span> CSS <span>.css</span></button>
+                <button class="file-type-option" data-extension="txt" role="menuitem"><span class="file-icon text">·</span> Text <span>.txt</span></button>
+                <div class="custom-extension">
+                  <span class="custom-extension-label">Custom</span>
+                  <input id="customExtension" type="text" maxlength="12" placeholder="ext" aria-label="Custom extension" />
+                  <button id="createCustomFile" title="Create custom file">Create</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="workspace-name">SLATE WORKSPACE</div>
+          <div class="file-tree" id="fileTree"></div>
+          <div class="sidebar-footer">
+            <span class="sync-dot"></span>
+            <span>All changes saved</span>
+          </div>
+        </aside>
+
+        <section class="editor-area">
+          <div class="tabs" id="tabs"></div>
+          <div class="editor-toolbar">
+            <div class="breadcrumbs" id="breadcrumbs"></div>
+            <div class="editor-actions">
+              <button class="toolbar-button" id="previewButton"><span class="preview-dot"></span> Preview</button>
+              <button class="download-button" id="downloadButton">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7.5 11.5 12 16l4.5-4.5M5 20h14"></path></svg>
+                Download
+              </button>
+            </div>
+          </div>
+          <div class="editor-wrap">
+            <div class="editor-pane" id="editorPane">
+              <div class="line-numbers" id="lineNumbers" aria-hidden="true"></div>
+              <textarea id="editor" spellcheck="false" aria-label="Text editor"></textarea>
+            </div>
+            <article class="markdown-preview hidden" id="markdownPreview"></article>
+          </div>
+          <div class="statusbar">
+            <div class="status-left"><span class="status-branch">⌘ main</span><span>✓ 0</span><span>⇣ 0</span></div>
+            <div class="status-right"><span id="cursorPosition">Ln 1, Col 1</span><span id="languageStatus">Markdown</span><span>UTF-8</span><span>LF</span><span>♡</span></div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <div class="toast" id="toast" role="status"></div>
+    <div class="modal-backdrop hidden" id="closeModal" role="presentation">
+      <section class="close-modal" role="dialog" aria-modal="true" aria-labelledby="closeModalTitle">
+        <h2 id="closeModalTitle">Close file?</h2>
+        <p id="closeModalMessage"></p>
+        <div class="modal-actions">
+          <button class="modal-button secondary" id="cancelCloseButton">Cancel</button>
+          <button class="modal-button danger" id="deleteFileButton">Delete file</button>
+          <button class="modal-button primary" id="saveFileButton">Save & close tab</button>
+        </div>
+      </section>
+    </div>
+    <div class="modal-backdrop hidden" id="downloadModal" role="presentation">
+      <section class="close-modal" role="dialog" aria-modal="true" aria-labelledby="downloadModalTitle">
+        <h2 id="downloadModalTitle">Download file</h2>
+        <p>Confirm the filename before downloading your work.</p>
+        <label class="download-name-label" for="downloadFileName">File name</label>
+        <input class="download-name-input" id="downloadFileName" type="text" maxlength="120" />
+        <div class="modal-actions">
+          <button class="modal-button secondary" id="cancelDownloadButton">Cancel</button>
+          <button class="modal-button primary" id="confirmDownloadButton">Download</button>
+        </div>
+      </section>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>
