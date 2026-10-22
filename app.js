@@ -31,6 +31,12 @@ const aboutModal = document.getElementById("aboutModal");
 const sidebar = document.getElementById("sidebar");
 const collapseSidebarButton = document.getElementById("collapseSidebarButton");
 const reopenSidebarButton = document.getElementById("reopenSidebarButton");
+const searchActivityButton = document.getElementById("searchActivityButton");
+const explorerContent = document.getElementById("explorerContent");
+const searchView = document.getElementById("searchView");
+const workspaceSearch = document.getElementById("workspaceSearch");
+const searchSummary = document.getElementById("searchSummary");
+const searchResults = document.getElementById("searchResults");
 let pendingCloseIndex = -1;
 
 function saveWorkspace() {
@@ -89,6 +95,59 @@ function renderChrome() {
   const current = files[activeIndex];
   breadcrumbs.innerHTML = current ? `<span>workspace</span><span>›</span><strong>${current.name}</strong>` : "<span>No file open</span>";
   languageStatus.textContent = current ? (current.type === "markdown" ? "Markdown" : current.type === "javascript" ? "JavaScript" : current.type === "css" ? "CSS" : "Plain Text") : "Plain Text";
+}
+
+function escapeHtml(value) {
+  return value.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character]);
+}
+
+function renderSearchResults(query) {
+  const normalizedQuery = query.trim().toLowerCase();
+  if (!normalizedQuery) {
+    searchSummary.textContent = "Search all files in your workspace";
+    searchResults.innerHTML = "";
+    return;
+  }
+  const matches = [];
+  files.forEach((file, fileIndex) => {
+    file.content.split("\n").forEach((line, lineIndex) => {
+      if (line.toLowerCase().includes(normalizedQuery)) matches.push({ fileIndex, lineIndex, line });
+    });
+  });
+  searchSummary.textContent = matches.length ? `${matches.length} ${matches.length === 1 ? "match" : "matches"} in ${new Set(matches.map((match) => match.fileIndex)).size} files` : "No matches found";
+  searchResults.innerHTML = matches.map((match) => {
+    const escapedLine = escapeHtml(match.line.trim() || "(empty line)");
+    const highlightedLine = escapedLine.replace(new RegExp(`(${escapeHtml(query.trim()).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "ig"), "<mark>$1</mark>");
+    return `<button class="search-result" data-file-index="${match.fileIndex}" data-line="${match.lineIndex}">
+      <span class="search-result-file"><span class="file-icon ${files[match.fileIndex].type}">${iconFor(files[match.fileIndex].type)}</span>${escapeHtml(files[match.fileIndex].name)}<span class="search-result-count">Ln ${match.lineIndex + 1}</span></span>
+      <span class="search-result-match">${highlightedLine}</span>
+    </button>`;
+  }).join("");
+  searchResults.querySelectorAll(".search-result").forEach((result) => result.addEventListener("click", () => {
+    const fileIndex = Number(result.dataset.fileIndex);
+    const lineIndex = Number(result.dataset.line);
+    openFile(fileIndex);
+    const position = editor.value.split("\n").slice(0, lineIndex).join("\n").length + (lineIndex ? 1 : 0);
+    editor.focus();
+    editor.setSelectionRange(position, position + editor.value.split("\n")[lineIndex].length);
+    updateCursor();
+  }));
+}
+
+function showSearchView() {
+  setSidebarCollapsed(false);
+  explorerContent.classList.add("hidden");
+  fileTree.classList.add("hidden");
+  searchView.classList.remove("hidden");
+  searchActivityButton.classList.add("active");
+  workspaceSearch.focus();
+}
+
+function showExplorerView() {
+  explorerContent.classList.remove("hidden");
+  fileTree.classList.remove("hidden");
+  searchView.classList.add("hidden");
+  searchActivityButton.classList.remove("active");
 }
 
 function updateLines() {
@@ -193,6 +252,9 @@ function setSidebarCollapsed(collapsed) {
 
 collapseSidebarButton.addEventListener("click", () => setSidebarCollapsed(true));
 reopenSidebarButton.addEventListener("click", () => setSidebarCollapsed(false));
+document.querySelector(".activity-item[title='Explorer']").addEventListener("click", showExplorerView);
+searchActivityButton.addEventListener("click", showSearchView);
+workspaceSearch.addEventListener("input", () => renderSearchResults(workspaceSearch.value));
 
 function markdownToHtml(markdown) {
   return markdown
@@ -364,13 +426,7 @@ closeModal.addEventListener("click", (event) => {
   if (event.target === closeModal) document.getElementById("cancelCloseButton").click();
 });
 
-document.getElementById("searchButton").addEventListener("click", () => {
-  const query = window.prompt("Search workspace");
-  if (!query) return;
-  const found = files.findIndex((file) => file.content.toLowerCase().includes(query.toLowerCase()));
-  if (found >= 0) { openFile(found); showToast(`Found "${query}" in ${files[found].name}`); }
-  else showToast(`No matches for "${query}"`);
-});
+document.getElementById("searchButton").addEventListener("click", showSearchView);
 
 editor.value = files[activeIndex].content;
 loadWorkspace();
