@@ -46,6 +46,7 @@ svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-lineca
 .activity-spacer { flex: 1; }
 .sidebar { width: 242px; flex: 0 0 242px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
 .sidebar-heading { height: 47px; padding: 0 13px 0 18px; display: flex; align-items: center; justify-content: space-between; text-transform: uppercase; letter-spacing: .08em; font-size: 10px; font-weight: 600; color: var(--soft); }
+.sidebar-actions { display: flex; align-items: center; gap: 2px; }.collapse-button { font-size: 24px; font-weight: 300; }.sidebar-reopen { width: 25px; height: 34px; align-self: flex-start; margin-top: 47px; border: 1px solid var(--border); border-left: 0; border-radius: 0 5px 5px 0; color: var(--muted); background: var(--panel); font-size: 24px; line-height: 1; }.sidebar-reopen:hover { color: var(--text); background: #1b2933; }
 .plain-icon { width: 24px; height: 24px; font-size: 19px; line-height: 1; border-radius: 4px; }
 .new-file-control { position: relative; }
 .new-file-menu { position: absolute; z-index: 5; top: 31px; right: 0; width: 220px; padding: 7px; border: 1px solid #34424e; border-radius: 6px; background: #18232d; box-shadow: 0 12px 30px #00000066; text-transform: none; letter-spacing: normal; }
