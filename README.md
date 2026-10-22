@@ -4,7 +4,7 @@ WebSlate is a focused, browser-based writing workspace inspired by Visual Studio
 
 ## Run locally
 
-Open [WebSlate] in a browser. No build step or package installation is required.
+Open [WebSlate](https://snb220.github.io/WebSlate/index.html) in a browser. No build step or package installation is required.
 
 ## Publish on GitHub Pages
 
