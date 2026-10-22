@@ -19,7 +19,7 @@
         </div>
         <nav class="top-nav" aria-label="Workspace navigation">
           <button class="top-nav-item active">Workspace</button>
-          <button class="top-nav-item">Extensions</button>
+          <a class="top-nav-item top-nav-link" href="bookmarklet.html">Extensions</a>
         </nav>
         <div class="top-actions">
           <button class="icon-button" id="searchButton" title="Search files" aria-label="Search files">
@@ -34,7 +34,7 @@
           <button class="activity-item active" title="Explorer" aria-label="Explorer">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4.5h6l2 2h8v13H4z"></path><path d="M4 8h16"></path></svg>
           </button>
-          <button class="activity-item" title="Search" aria-label="Search">
+          <button class="activity-item" id="searchActivityButton" title="Search" aria-label="Search">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 4.5 4.5"></path></svg>
           </button>
           <button class="activity-item" title="Source control" aria-label="Source control">
@@ -70,8 +70,17 @@
               </div>
             </div>
           </div>
-          <div class="workspace-name">WEBSLATE WORKSPACE</div>
+          <div class="workspace-name" id="explorerContent">WEBSLATE WORKSPACE</div>
           <div class="file-tree" id="fileTree"></div>
+          <div class="search-view hidden" id="searchView">
+            <label class="search-label" for="workspaceSearch">Search workspace</label>
+            <div class="search-input-wrap">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 4.5 4.5"></path></svg>
+              <input id="workspaceSearch" type="search" placeholder="Find in files" autocomplete="off" />
+            </div>
+            <div class="search-summary" id="searchSummary"></div>
+            <div class="search-results" id="searchResults"></div>
+          </div>
           <div class="sidebar-footer">
             <span class="sync-dot"></span>
             <span>All changes saved</span>
