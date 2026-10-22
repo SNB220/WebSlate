@@ -36,7 +36,7 @@ button { font: inherit; color: inherit; border: 0; cursor: pointer; }
 .icon-button { width: 30px; height: 30px; border-radius: 5px; }
 .icon-button:hover, .plain-icon:hover { color: var(--text); background: #1b2732; }
 svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.6; }
-.avatar { width: 27px; height: 27px; margin-left: 8px; border-radius: 50%; background: #234453; color: #9ce3cc; font-size: 10px; font-weight: 700; }
+.avatar { width: 34px; height: 27px; display: grid; place-items: center; margin-left: 8px; border-radius: 14px; background: #234453; color: #9ce3cc; font-size: 10px; font-weight: 700; text-decoration: none; transition: .15s ease; }.avatar:hover { color: #d6fff0; background: #2d5963; }
 .workspace { display: flex; min-height: 0; flex: 1; }
 .activity-bar { width: 53px; flex: 0 0 53px; background: #0d131a; border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding: 11px 0; }
 .activity-item { width: 43px; height: 43px; display: grid; place-items: center; background: transparent; color: #667482; border-left: 2px solid transparent; }
