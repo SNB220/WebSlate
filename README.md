@@ -1,6 +1,6 @@
-# Slate
+# WebSlate
 
-Slate is a focused, browser-based writing workspace inspired by Visual Studio Code. Write in Markdown, edit code, keep lightweight notes, and download your files when they are ready.
+WebSlate is a focused, browser-based writing workspace inspired by Visual Studio Code. Write in Markdown, edit code, keep lightweight notes, and download your files when they are ready.
 
 ## Run locally
 
@@ -16,4 +16,4 @@ Open `index.html` in a browser. No build step or package installation is require
 - New file creation
 - Download the active file
 
-Files currently live in memory in the browser. A future version can add persistence, folders, keyboard shortcuts, and GitHub integration.
+Files are persisted in the browser with local storage. A future version can add folders, keyboard shortcuts, and GitHub integration.
