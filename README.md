@@ -26,3 +26,5 @@ After installation, click the bookmarklet from any page to open your personal We
 - Download the active file
 
 Files are persisted in the browser with local storage. The repository also includes a bookmarklet installation page and GitHub Pages deployment workflow.
+
+The About welcome dialog appears automatically for each new browser, then stays available from the help icon.

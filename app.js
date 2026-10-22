@@ -6,6 +6,7 @@ const starterFiles = [
 ];
 
 const STORAGE_KEY = "slate-workspace-v1";
+const WELCOME_KEY = "slate-welcome-seen-v1";
 let files = starterFiles;
 let activeIndex = 0;
 let openTabs = files.map((_, index) => index);
@@ -329,17 +330,24 @@ downloadModal.addEventListener("click", (event) => {
   if (event.target === downloadModal) downloadModal.classList.add("hidden");
 });
 
-document.getElementById("helpButton").addEventListener("click", () => {
+function showAboutModal() {
   aboutModal.classList.remove("hidden");
   document.getElementById("closeAboutButton").focus();
-});
-document.getElementById("closeAboutButton").addEventListener("click", () => aboutModal.classList.add("hidden"));
+}
+
+function dismissAboutModal() {
+  aboutModal.classList.add("hidden");
+  localStorage.setItem(WELCOME_KEY, "true");
+}
+
+document.getElementById("helpButton").addEventListener("click", showAboutModal);
+document.getElementById("closeAboutButton").addEventListener("click", dismissAboutModal);
 aboutModal.addEventListener("click", (event) => {
-  if (event.target === aboutModal) aboutModal.classList.add("hidden");
+  if (event.target === aboutModal) dismissAboutModal();
 });
 document.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") return;
-  aboutModal.classList.add("hidden");
+  dismissAboutModal();
   downloadModal.classList.add("hidden");
   closeModal.classList.add("hidden");
 });
@@ -434,3 +442,4 @@ editor.value = activeIndex >= 0 ? files[activeIndex].content : "";
 renderChrome();
 updateLines();
 updateCursor();
+if (!localStorage.getItem(WELCOME_KEY)) showAboutModal();
