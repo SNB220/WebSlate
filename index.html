@@ -12,7 +12,10 @@
       <header class="topbar">
         <div class="brand">
           <div class="brand-mark">S</div>
-          <span>WebSlate</span>
+          <div class="brand-copy">
+            <span>WebSlate</span>
+            <small>by SNB</small>
+          </div>
         </div>
         <nav class="top-nav" aria-label="Workspace navigation">
           <button class="top-nav-item active">Workspace</button>
@@ -41,7 +44,7 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="2.5"></circle><circle cx="18" cy="6" r="2.5"></circle><circle cx="18" cy="18" r="2.5"></circle><path d="M8.5 6h7M6 8.5v5a4.5 4.5 0 0 0 4.5 4.5H15"></path></svg>
           </button>
           <div class="activity-spacer"></div>
-          <button class="activity-item" title="Help" aria-label="Help">
+          <button class="activity-item" id="helpButton" title="About WebSlate" aria-label="About WebSlate">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.7 9a2.4 2.4 0 1 1 4 1.8c-1.1.8-1.7 1.3-1.7 2.7M12 17.5h.01"></path></svg>
           </button>
         </aside>
@@ -122,6 +125,29 @@
         <div class="modal-actions">
           <button class="modal-button secondary" id="cancelDownloadButton">Cancel</button>
           <button class="modal-button primary" id="confirmDownloadButton">Download</button>
+        </div>
+      </section>
+    </div>
+    <div class="modal-backdrop hidden" id="aboutModal" role="presentation">
+      <section class="about-modal" role="dialog" aria-modal="true" aria-labelledby="aboutModalTitle">
+        <button class="about-close" id="closeAboutButton" aria-label="Close about WebSlate">×</button>
+        <div class="about-hero">
+          <div class="about-mark">W</div>
+          <div>
+            <div class="about-eyebrow">A calm space to create</div>
+            <h2 id="aboutModalTitle">WebSlate</h2>
+            <div class="about-byline">by SNB</div>
+          </div>
+        </div>
+        <p class="about-intro">A focused, browser-based workspace for turning thoughts into words and ideas into working code.</p>
+        <div class="about-features">
+          <div class="about-feature"><span>✦</span><div><strong>Write freely</strong><small>Markdown, notes, and plain text in one quiet workspace.</small></div></div>
+          <div class="about-feature"><span>⌘</span><div><strong>Build with focus</strong><small>Edit JavaScript, CSS, and custom file types with ease.</small></div></div>
+          <div class="about-feature"><span>↗</span><div><strong>Keep ownership</strong><small>Your files persist in this browser and are ready to download.</small></div></div>
+        </div>
+        <div class="about-footer">
+          <span>WebSlate · Write. Build. Ship.</span>
+          <a href="https://github.com/SNB220/WebSlate" target="_blank" rel="noopener noreferrer">View on GitHub <span>↗</span></a>
         </div>
       </section>
     </div>

@@ -22,8 +22,11 @@ body { background: var(--bg); color: var(--text); font-family: "Segoe UI", Inter
 button { font: inherit; color: inherit; border: 0; cursor: pointer; }
 .app-shell { height: 100vh; display: flex; flex-direction: column; }
 .topbar { height: 52px; display: flex; align-items: center; padding: 0 17px; background: #10161d; border-bottom: 1px solid var(--border); }
-.brand { display: flex; align-items: center; gap: 10px; width: 190px; font-weight: 600; font-size: 15px; letter-spacing: .2px; }
+.brand { display: flex; align-items: center; gap: 10px; width: 190px; }
 .brand-mark { width: 25px; height: 25px; display: grid; place-items: center; color: #08110e; background: var(--accent); border-radius: 7px; font-weight: 800; font-size: 15px; }
+.brand-copy { display: flex; flex-direction: column; gap: 1px; line-height: 1; }
+.brand-copy > span { font-weight: 600; font-size: 15px; letter-spacing: .2px; }
+.brand-copy small { color: #78958d; font-size: 9px; font-weight: 500; letter-spacing: .04em; }
 .top-nav { height: 100%; display: flex; align-items: stretch; gap: 25px; }
 .top-nav-item { background: none; color: var(--muted); position: relative; padding: 0 2px; }
 .top-nav-item.active { color: var(--text); }
@@ -103,4 +106,10 @@ svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-lineca
 .modal-button.danger { color: #ffb7b7; background: #48272b; border-color: #704046; }.modal-button.danger:hover { background: #5c2d32; }
 .modal-button.primary { color: #07130e; background: var(--accent); font-weight: 600; }.modal-button.primary:hover { background: var(--accent-bright); }
 .rename-input { min-width: 0; flex: 1; height: 23px; padding: 2px 5px; border: 1px solid var(--accent); border-radius: 3px; outline: 0; color: var(--text); background: #0d151c; font: inherit; }
+.about-modal { position: relative; width: min(500px, calc(100vw - 32px)); overflow: hidden; padding: 28px; border: 1px solid #344b48; border-radius: 12px; background: linear-gradient(145deg, #1a2a31, #14201f 65%, #172b27); box-shadow: 0 22px 70px #00000099; }
+.about-close { position: absolute; top: 13px; right: 15px; width: 28px; height: 28px; border-radius: 5px; color: #8ea19f; background: transparent; font-size: 21px; line-height: 1; }.about-close:hover { color: white; background: #ffffff12; }
+.about-hero { display: flex; align-items: center; gap: 13px; }.about-mark { width: 45px; height: 45px; display: grid; place-items: center; border-radius: 12px; color: #06110d; background: linear-gradient(135deg, var(--accent-bright), var(--accent)); font-size: 24px; font-weight: 800; box-shadow: 0 8px 24px #42b88344; }
+.about-eyebrow { color: var(--accent-bright); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }.about-modal h2 { margin: 2px 0 0; color: #f1f7f5; font-size: 25px; letter-spacing: -.03em; }.about-byline { margin-top: 2px; color: #8fa9a2; font-size: 11px; letter-spacing: .06em; }.about-intro { max-width: 410px; margin: 22px 0 20px; color: #b5c8c4; font-size: 14px; line-height: 1.6; }
+.about-features { display: grid; gap: 9px; }.about-feature { display: flex; gap: 12px; padding: 12px; border: 1px solid #ffffff0d; border-radius: 7px; background: #ffffff08; }.about-feature > span { width: 20px; color: var(--accent-bright); font-size: 17px; text-align: center; }.about-feature strong { display: block; margin-bottom: 2px; color: #e8f3ef; font-size: 12px; }.about-feature small { color: #9eb2ae; font-size: 11px; line-height: 1.4; }
+.about-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 23px; padding-top: 17px; border-top: 1px solid #ffffff14; color: #819793; font-size: 10px; }.about-footer a { color: var(--accent-bright); font-size: 11px; font-weight: 600; text-decoration: none; }.about-footer a:hover { color: white; }.about-footer a span { margin-left: 3px; }
 @media (max-width: 700px) { .sidebar { width: 190px; flex-basis: 190px; }.brand { width: 130px; }.top-nav { display: none; }.editor-toolbar { padding: 0 10px; }.breadcrumbs { display: none; }.markdown-preview { padding: 30px 24px; } }

@@ -27,6 +27,7 @@ const newFileName = document.getElementById("newFileName");
 const customExtension = document.getElementById("customExtension");
 const downloadModal = document.getElementById("downloadModal");
 const downloadFileName = document.getElementById("downloadFileName");
+const aboutModal = document.getElementById("aboutModal");
 let pendingCloseIndex = -1;
 
 function saveWorkspace() {
@@ -252,6 +253,21 @@ downloadFileName.addEventListener("keydown", (event) => {
 });
 downloadModal.addEventListener("click", (event) => {
   if (event.target === downloadModal) downloadModal.classList.add("hidden");
+});
+
+document.getElementById("helpButton").addEventListener("click", () => {
+  aboutModal.classList.remove("hidden");
+  document.getElementById("closeAboutButton").focus();
+});
+document.getElementById("closeAboutButton").addEventListener("click", () => aboutModal.classList.add("hidden"));
+aboutModal.addEventListener("click", (event) => {
+  if (event.target === aboutModal) aboutModal.classList.add("hidden");
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") return;
+  aboutModal.classList.add("hidden");
+  downloadModal.classList.add("hidden");
+  closeModal.classList.add("hidden");
 });
 
 function createNewFile(extension) {
