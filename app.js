@@ -7,6 +7,7 @@ const starterFiles = [
 
 const STORAGE_KEY = "slate-workspace-v1";
 const WELCOME_KEY = "slate-welcome-seen-v1";
+const THEME_KEY = "slate-theme-v1";
 let files = starterFiles;
 let activeIndex = 0;
 let openTabs = files.map((_, index) => index);
@@ -20,6 +21,7 @@ const markdownPreview = document.getElementById("markdownPreview");
 const languageStatus = document.getElementById("languageStatus");
 const cursorPosition = document.getElementById("cursorPosition");
 const toast = document.getElementById("toast");
+const themeButton = document.getElementById("themeButton");
 const closeModal = document.getElementById("closeModal");
 const closeModalMessage = document.getElementById("closeModalMessage");
 const newFileButton = document.getElementById("newFileButton");
@@ -39,6 +41,22 @@ const workspaceSearch = document.getElementById("workspaceSearch");
 const searchSummary = document.getElementById("searchSummary");
 const searchResults = document.getElementById("searchResults");
 let pendingCloseIndex = -1;
+
+function applyTheme(theme) {
+  document.body.dataset.theme = theme;
+  const lightMode = theme === "light";
+  themeButton.title = lightMode ? "Switch to dark mode" : "Switch to light mode";
+  themeButton.setAttribute("aria-label", themeButton.title);
+}
+
+function toggleTheme() {
+  const nextTheme = document.body.dataset.theme === "light" ? "dark" : "light";
+  applyTheme(nextTheme);
+  localStorage.setItem(THEME_KEY, nextTheme);
+}
+
+applyTheme(localStorage.getItem(THEME_KEY) === "light" ? "light" : "dark");
+themeButton.addEventListener("click", toggleTheme);
 
 function saveWorkspace() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
