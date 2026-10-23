@@ -25,4 +25,4 @@ After installation, click the bookmarklet from any page to open your personal We
 - New file creation
 - Download the active file
 
-Files are persisted in the browser with local storage. The repository also includes a bookmarklet installation page and GitHub Pages deployment workflow.
+Files are persisted in the browser with local storage. Downloads preserve the selected file extension, including on mobile browsers. The repository also includes a bookmarklet installation page and GitHub Pages deployment workflow.

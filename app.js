@@ -310,12 +310,18 @@ function downloadActiveFile() {
   const currentName = files[activeIndex].name;
   const currentExtension = currentName.includes(".") ? currentName.slice(currentName.lastIndexOf(".")) : "";
   const downloadName = enteredName.includes(".") ? enteredName : `${enteredName}${currentExtension}`;
-  const blob = new Blob([editor.value], { type: "text/plain;charset=utf-8" });
+  const extension = downloadName.includes(".") ? downloadName.slice(downloadName.lastIndexOf(".")).toLowerCase() : "";
+  const mimeType = extension === ".md" ? "text/markdown;charset=utf-8"
+    : extension === ".js" ? "text/javascript;charset=utf-8"
+      : extension === ".css" ? "text/css;charset=utf-8"
+        : extension === ".txt" ? "text/plain;charset=utf-8"
+          : "application/octet-stream";
+  const blob = new Blob([editor.value], { type: mimeType });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
   link.download = downloadName;
   link.click();
-  URL.revokeObjectURL(link.href);
+  setTimeout(() => URL.revokeObjectURL(link.href), 1000);
   downloadModal.classList.add("hidden");
   showToast(`${downloadName} downloaded`);
 }
