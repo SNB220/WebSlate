@@ -338,16 +338,18 @@ function downloadActiveFile() {
   const extension = downloadName.includes(".") ? downloadName.slice(downloadName.lastIndexOf(".")).toLowerCase() : "";
   const mimeType = extension === ".md" ? "text/markdown;charset=utf-8" : "application/octet-stream";
   const blob = new Blob([editor.value], { type: mimeType });
+  const objectUrl = URL.createObjectURL(blob);
   const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
+  link.href = objectUrl;
   link.download = downloadName;
   link.style.display = "none";
   document.body.appendChild(link);
   link.click();
   setTimeout(() => {
-    URL.revokeObjectURL(link.href);
+    URL.revokeObjectURL(objectUrl);
     link.remove();
-  }, 1000);
+  }, 10000);
+  saveWorkspace();
   downloadModal.classList.add("hidden");
   showToast(`${downloadName} downloaded`);
 }
