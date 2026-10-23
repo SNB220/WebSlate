@@ -172,6 +172,11 @@ function showExplorerView() {
 function updateLines() {
   const count = Math.max(1, editor.value.split("\n").length);
   lineNumbers.innerHTML = Array.from({ length: count }, (_, index) => index + 1).join("<br>");
+  syncLineNumbers();
+}
+
+function syncLineNumbers() {
+  lineNumbers.scrollTop = editor.scrollTop;
 }
 
 function openFile(index) {
@@ -180,6 +185,7 @@ function openFile(index) {
   if (!openTabs.includes(index)) openTabs.push(index);
   activeIndex = index;
   editor.value = files[index].content;
+  editor.scrollTop = 0;
   previewing = false;
   markdownPreview.classList.add("hidden");
   document.getElementById("editorPane").classList.remove("hidden");
@@ -216,6 +222,7 @@ function finishCloseTab(fileIndex, shouldDelete) {
     document.getElementById("editorPane").classList.remove("hidden");
     document.getElementById("previewButton").innerHTML = '<span class="preview-dot"></span> Preview';
     editor.value = nextFileIndex >= 0 ? files[nextFileIndex].content : "";
+    editor.scrollTop = 0;
     updateLines();
     updateCursor();
   } else if (shouldDelete && activeIndex > fileIndex) {
@@ -297,7 +304,7 @@ editor.addEventListener("input", () => {
 });
 editor.addEventListener("click", updateCursor);
 editor.addEventListener("keyup", updateCursor);
-editor.addEventListener("scroll", () => { lineNumbers.scrollTop = editor.scrollTop; });
+editor.addEventListener("scroll", syncLineNumbers);
 
 document.getElementById("previewButton").addEventListener("click", () => {
   if (activeIndex < 0) { showToast("Open a file to preview it"); return; }
