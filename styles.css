@@ -45,6 +45,16 @@ body[data-theme="light"] .about-feature { border-color: #cfe4db; background: #ff
 body[data-theme="light"] .about-feature strong { color: var(--text); }
 body[data-theme="light"] .about-feature small { color: var(--soft); }
 body[data-theme="light"] .about-footer { border-color: #cfe4db; color: var(--muted); }
+body[data-theme="light"] .icon-button:hover,
+body[data-theme="light"] .plain-icon:hover,
+body[data-theme="light"] .toolbar-button:hover,
+body[data-theme="light"] .sidebar-reopen:hover {
+  color: var(--text);
+  background: #e5edf0;
+}
+body[data-theme="light"] .activity-item:hover { color: var(--text); background: #f1f5f6; }
+body[data-theme="light"] .file-type-option:hover { color: var(--text); background: #e5edf0; }
+body[data-theme="light"] .download-button:hover { color: #09140f; background: var(--accent-bright); }
 button { font: inherit; color: inherit; border: 0; cursor: pointer; }
 .app-shell { height: 100vh; display: flex; flex-direction: column; }
 .topbar { height: 52px; display: flex; align-items: center; padding: 0 17px; background: var(--panel); border-bottom: 1px solid var(--border); }
