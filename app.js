@@ -326,15 +326,32 @@ searchActivityButton.addEventListener("click", showSearchView);
 workspaceSearch.addEventListener("input", () => renderSearchResults(workspaceSearch.value));
 
 function markdownToHtml(markdown) {
-  return markdown
-    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+  const escaped = markdown.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const inlineMarkup = (value) => value
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/`([^`]+)`/g, "<code>$1</code>");
+  const tablePattern = /(^\|?.+\|.+\|?\n\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\n(?:\|?.+\|.+\|?\n?)+)/gm;
+  const withTables = escaped.replace(tablePattern, (tableBlock) => {
+    const rows = tableBlock.trim().split("\n").map((row) => row.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cell.trim()));
+    const headers = rows.shift();
+    rows.shift();
+    const alignments = headers.map((_, index) => {
+      const separator = tableBlock.trim().split("\n")[1].replace(/^\|/, "").replace(/\|$/, "").split("|")[index]?.trim() || "";
+      return separator.startsWith(":") && separator.endsWith(":") ? "center" : separator.startsWith(":") ? "left" : separator.endsWith(":") ? "right" : "";
+    });
+    const cell = (tag, value, index) => `<${tag}${alignments[index] ? ` style="text-align:${alignments[index]}"` : ""}>${inlineMarkup(value)}</${tag}>`;
+    const headerHtml = headers.map((header, index) => cell("th", header, index)).join("");
+    const bodyHtml = rows.map((row) => `<tr>${headers.map((_, index) => cell("td", row[index] || "", index)).join("")}</tr>`).join("");
+    return `<table><thead><tr>${headerHtml}</tr></thead><tbody>${bodyHtml}</tbody></table>`;
+  });
+  return withTables
     .replace(/^### (.*)$/gm, "<h3>$1</h3>").replace(/^## (.*)$/gm, "<h2>$1</h2>").replace(/^# (.*)$/gm, "<h1>$1</h1>")
     .replace(/^&gt; (.*)$/gm, "<blockquote>$1</blockquote>")
     .replace(/^\- (.*)$/gm, "<li>$1</li>")
     .replace(/```([\s\S]*?)```/g, "<pre>$1</pre>")
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/`([^`]+)`/g, "<code>$1</code>")
     .replace(/(<li>.*<\/li>\n?)+/g, (list) => `<ul>${list}</ul>`)
-    .split(/\n\n+/).map((block) => /^(<h|<ul|<pre|<blockquote)/.test(block) ? block : `<p>${block.replace(/\n/g, "<br>")}</p>`).join("");
+    .split(/\n\n+/).map((block) => /^(<h|<ul|<pre|<blockquote|<table)/.test(block) ? block : `<p>${block.replace(/\n/g, "<br>")}</p>`).join("");
 }
 
 editor.addEventListener("input", () => {
