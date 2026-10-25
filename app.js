@@ -221,7 +221,7 @@ function updateLines() {
 }
 
 function historyFor(index) {
-  if (!editHistory.has(index)) editHistory.set(index, { entries: [files[index]?.content || ""], position: 0 });
+  if (!editHistory.has(index)) editHistory.set(index, { entries: [files[index]?.content || ""], position: 0, lastEditAt: 0 });
   return editHistory.get(index);
 }
 
@@ -236,9 +236,15 @@ function recordEdit() {
   const history = historyFor(activeIndex);
   const currentValue = editor.value;
   if (history.entries[history.position] === currentValue) return;
-  history.entries = history.entries.slice(0, history.position + 1);
-  history.entries.push(currentValue);
-  history.position += 1;
+  const now = Date.now();
+  if (now - history.lastEditAt < 500) {
+    history.entries[history.position] = currentValue;
+  } else {
+    history.entries = history.entries.slice(0, history.position + 1);
+    history.entries.push(currentValue);
+    history.position += 1;
+  }
+  history.lastEditAt = now;
   updateHistoryButtons();
 }
 
@@ -248,12 +254,14 @@ function restoreHistory(direction) {
   const nextPosition = history.position + direction;
   if (nextPosition < 0 || nextPosition >= history.entries.length) return;
   history.position = nextPosition;
+  history.lastEditAt = 0;
   restoringHistory = true;
   editor.value = history.entries[history.position];
   files[activeIndex].content = editor.value;
   restoringHistory = false;
   updateLines();
   updateCursor();
+  if (previewing) markdownPreview.innerHTML = markdownToHtml(editor.value);
   updateHistoryButtons();
   saveWorkspace();
 }
@@ -458,9 +466,10 @@ editor.addEventListener("scroll", syncLineNumbers);
 
 undoButton.addEventListener("click", () => restoreHistory(-1));
 redoButton.addEventListener("click", () => restoreHistory(1));
-editor.addEventListener("keydown", (event) => {
+document.addEventListener("keydown", (event) => {
   const modifier = event.ctrlKey || event.metaKey;
   if (!modifier || event.altKey) return;
+  if (activeIndex < 0) return;
   if (event.key.toLowerCase() === "z") {
     event.preventDefault();
     restoreHistory(event.shiftKey ? 1 : -1);
@@ -637,7 +646,7 @@ document.getElementById("searchButton").addEventListener("click", showSearchView
 editor.value = files[activeIndex].content;
 loadWorkspace();
 editor.value = activeIndex >= 0 ? files[activeIndex].content : "";
-files.forEach((file, index) => editHistory.set(index, { entries: [file.content], position: 0 }));
+files.forEach((file, index) => editHistory.set(index, { entries: [file.content], position: 0, lastEditAt: 0 }));
 renderChrome();
 updateLines();
 updateCursor();
