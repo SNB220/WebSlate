@@ -12,6 +12,8 @@ let files = starterFiles;
 let activeIndex = 0;
 let openTabs = files.map((_, index) => index);
 let previewing = false;
+const editHistory = new Map();
+let restoringHistory = false;
 const editor = document.getElementById("editor");
 const lineNumbers = document.getElementById("lineNumbers");
 const fileTree = document.getElementById("fileTree");
@@ -34,6 +36,8 @@ const aboutModal = document.getElementById("aboutModal");
 const sidebar = document.getElementById("sidebar");
 const collapseSidebarButton = document.getElementById("collapseSidebarButton");
 const reopenSidebarButton = document.getElementById("reopenSidebarButton");
+const undoButton = document.getElementById("undoButton");
+const redoButton = document.getElementById("redoButton");
 const searchActivityButton = document.getElementById("searchActivityButton");
 const explorerContent = document.getElementById("explorerContent");
 const searchView = document.getElementById("searchView");
@@ -175,6 +179,44 @@ function updateLines() {
   syncLineNumbers();
 }
 
+function historyFor(index) {
+  if (!editHistory.has(index)) editHistory.set(index, { entries: [files[index]?.content || ""], position: 0 });
+  return editHistory.get(index);
+}
+
+function updateHistoryButtons() {
+  const history = activeIndex >= 0 ? historyFor(activeIndex) : { position: 0, entries: [""] };
+  undoButton.disabled = history.position === 0;
+  redoButton.disabled = history.position >= history.entries.length - 1;
+}
+
+function recordEdit() {
+  if (activeIndex < 0 || restoringHistory) return;
+  const history = historyFor(activeIndex);
+  const currentValue = editor.value;
+  if (history.entries[history.position] === currentValue) return;
+  history.entries = history.entries.slice(0, history.position + 1);
+  history.entries.push(currentValue);
+  history.position += 1;
+  updateHistoryButtons();
+}
+
+function restoreHistory(direction) {
+  if (activeIndex < 0) return;
+  const history = historyFor(activeIndex);
+  const nextPosition = history.position + direction;
+  if (nextPosition < 0 || nextPosition >= history.entries.length) return;
+  history.position = nextPosition;
+  restoringHistory = true;
+  editor.value = history.entries[history.position];
+  files[activeIndex].content = editor.value;
+  restoringHistory = false;
+  updateLines();
+  updateCursor();
+  updateHistoryButtons();
+  saveWorkspace();
+}
+
 function syncLineNumbers() {
   lineNumbers.scrollTop = editor.scrollTop;
 }
@@ -192,6 +234,7 @@ function openFile(index) {
   document.getElementById("previewButton").innerHTML = '<span class="preview-dot"></span> Preview';
   renderChrome();
   updateLines();
+  updateHistoryButtons();
   editor.focus();
   saveWorkspace();
 }
@@ -300,11 +343,26 @@ editor.addEventListener("input", () => {
   updateLines();
   updateCursor();
   if (previewing) markdownPreview.innerHTML = markdownToHtml(editor.value);
+  recordEdit();
   saveWorkspace();
 });
 editor.addEventListener("click", updateCursor);
 editor.addEventListener("keyup", updateCursor);
 editor.addEventListener("scroll", syncLineNumbers);
+
+undoButton.addEventListener("click", () => restoreHistory(-1));
+redoButton.addEventListener("click", () => restoreHistory(1));
+editor.addEventListener("keydown", (event) => {
+  const modifier = event.ctrlKey || event.metaKey;
+  if (!modifier || event.altKey) return;
+  if (event.key.toLowerCase() === "z") {
+    event.preventDefault();
+    restoreHistory(event.shiftKey ? 1 : -1);
+  } else if (event.key.toLowerCase() === "y") {
+    event.preventDefault();
+    restoreHistory(1);
+  }
+});
 
 document.getElementById("previewButton").addEventListener("click", () => {
   if (activeIndex < 0) { showToast("Open a file to preview it"); return; }
@@ -473,7 +531,9 @@ document.getElementById("searchButton").addEventListener("click", showSearchView
 editor.value = files[activeIndex].content;
 loadWorkspace();
 editor.value = activeIndex >= 0 ? files[activeIndex].content : "";
+files.forEach((file, index) => editHistory.set(index, { entries: [file.content], position: 0 }));
 renderChrome();
 updateLines();
 updateCursor();
+updateHistoryButtons();
 if (!localStorage.getItem(WELCOME_KEY)) showAboutModal();

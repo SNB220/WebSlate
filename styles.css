@@ -125,6 +125,7 @@ body[data-theme="light"] .tab.active { color: var(--text); background: var(--edi
 .breadcrumbs { font-size: 11px; }.breadcrumbs strong { color: #bbc8d3; font-weight: 500; }.breadcrumbs span { margin: 0 7px; color: #53616d; }
 .editor-actions { display: flex; gap: 9px; }.toolbar-button, .download-button { display: inline-flex; align-items: center; gap: 7px; height: 27px; padding: 0 10px; border: 1px solid transparent; border-radius: 4px; background: transparent; color: #8796a4; font-size: 11px; }
 .toolbar-button:hover { background: #1a2630; color: var(--text); }.download-button { color: #09140f; background: var(--accent); font-weight: 600; }.download-button:hover { background: var(--accent-bright); }.download-button svg { width: 14px; height: 14px; stroke-width: 2; }
+.history-button { padding: 0 7px; font-size: 16px; line-height: 1; }.history-button span { font-size: 11px; }.history-button:disabled { cursor: not-allowed; color: #44515c; opacity: .7; }.history-button:disabled:hover { color: #44515c; background: transparent; }
 .preview-dot { width: 6px; height: 6px; border-radius: 50%; background: #667583; }.preview-dot.on { background: var(--accent); }
 .editor-wrap { min-height: 0; flex: 1; display: flex; overflow: hidden; }
 .editor-pane { width: 100%; min-width: 0; display: flex; padding-top: 14px; overflow: auto; }
