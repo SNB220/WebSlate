@@ -365,32 +365,78 @@ importActivityButton.addEventListener("click", () => importFileInput.click());
 importFileInput.addEventListener("change", () => importFiles(importFileInput.files));
 
 function markdownToHtml(markdown) {
-  const escaped = markdown.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  const inlineMarkup = (value) => value
-    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-    .replace(/`([^`]+)`/g, "<code>$1</code>");
-  const tablePattern = /(^\|?.+\|.+\|?\n\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\n(?:\|?.+\|.+\|?\n?)+)/gm;
-  const withTables = escaped.replace(tablePattern, (tableBlock) => {
-    const rows = tableBlock.trim().split("\n").map((row) => row.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cell.trim()));
-    const headers = rows.shift();
-    rows.shift();
-    const alignments = headers.map((_, index) => {
-      const separator = tableBlock.trim().split("\n")[1].replace(/^\|/, "").replace(/\|$/, "").split("|")[index]?.trim() || "";
-      return separator.startsWith(":") && separator.endsWith(":") ? "center" : separator.startsWith(":") ? "left" : separator.endsWith(":") ? "right" : "";
-    });
-    const cell = (tag, value, index) => `<${tag}${alignments[index] ? ` style="text-align:${alignments[index]}"` : ""}>${inlineMarkup(value)}</${tag}>`;
-    const headerHtml = headers.map((header, index) => cell("th", header, index)).join("");
-    const bodyHtml = rows.map((row) => `<tr>${headers.map((_, index) => cell("td", row[index] || "", index)).join("")}</tr>`).join("");
-    return `<table><thead><tr>${headerHtml}</tr></thead><tbody>${bodyHtml}</tbody></table>`;
-  });
-  return withTables
-    .replace(/^### (.*)$/gm, "<h3>$1</h3>").replace(/^## (.*)$/gm, "<h2>$1</h2>").replace(/^# (.*)$/gm, "<h1>$1</h1>")
-    .replace(/^&gt; (.*)$/gm, "<blockquote>$1</blockquote>")
-    .replace(/^\- (.*)$/gm, "<li>$1</li>")
-    .replace(/```([\s\S]*?)```/g, "<pre>$1</pre>")
-    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/`([^`]+)`/g, "<code>$1</code>")
-    .replace(/(<li>.*<\/li>\n?)+/g, (list) => `<ul>${list}</ul>`)
-    .split(/\n\n+/).map((block) => /^(<h|<ul|<pre|<blockquote|<table)/.test(block) ? block : `<p>${block.replace(/\n/g, "<br>")}</p>`).join("");
+  const escape = (value) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const inlineMarkup = (value) => {
+    let result = escape(value);
+    result = result.replace(/!\[([^\]]*)\]\((https?:\/\/[^)\s]+|\/[^)\s]+|#[^)\s]+)\)/g, '<img src="$2" alt="$1">');
+    result = result.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+|mailto:[^)\s]+|\/[^)\s]+|#[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+    result = result.replace(/`([^`]+)`/g, "<code>$1</code>");
+    result = result.replace(/\*\*(.*?)\*\*|__(.*?)__/g, (_, bold, underlined) => `<strong>${bold || underlined}</strong>`);
+    result = result.replace(/~~(.*?)~~/g, "<del>$1</del>");
+    result = result.replace(/\*([^*\n]+)\*|_([^_\n]+)_/g, (_, italic, underscored) => `<em>${italic || underscored}</em>`);
+    return result;
+  };
+  const lines = markdown.replace(/\r\n?/g, "\n").split("\n");
+  const output = [];
+  let index = 0;
+  const isTableSeparator = (line) => /^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(line);
+  const splitTableRow = (line) => line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cell.trim());
+  const alignmentFor = (separator) => separator.startsWith(":") && separator.endsWith(":") ? "center" : separator.startsWith(":") ? "left" : separator.endsWith(":") ? "right" : "";
+  const flushParagraph = (paragraph) => {
+    if (paragraph.length) output.push(`<p>${inlineMarkup(paragraph.join("\n")).replace(/\n/g, "<br>")}</p>`);
+  };
+
+  while (index < lines.length) {
+    const line = lines[index];
+    if (!line.trim()) { index += 1; continue; }
+    if (/^\s*```/.test(line)) {
+      const language = line.trim().slice(3).trim();
+      index += 1;
+      const code = [];
+      while (index < lines.length && !/^\s*```/.test(lines[index])) code.push(lines[index++]);
+      if (index < lines.length) index += 1;
+      output.push(`<pre${language ? ` data-language="${escape(language)}"` : ""}><code>${escape(code.join("\n"))}</code></pre>`);
+      continue;
+    }
+    if (index + 1 < lines.length && line.includes("|") && isTableSeparator(lines[index + 1])) {
+      const headers = splitTableRow(line);
+      const separators = splitTableRow(lines[index + 1]);
+      index += 2;
+      const body = [];
+      while (index < lines.length && lines[index].includes("|") && lines[index].trim()) body.push(splitTableRow(lines[index++]));
+      const cell = (tag, value, column) => {
+        const alignment = alignmentFor(separators[column] || "");
+        return `<${tag}${alignment ? ` style="text-align:${alignment}"` : ""}>${inlineMarkup(value || "")}</${tag}>`;
+      };
+      output.push(`<table><thead><tr>${headers.map((header, column) => cell("th", header, column)).join("")}</tr></thead><tbody>${body.map((row) => `<tr>${headers.map((_, column) => cell("td", row[column], column)).join("")}</tr>`).join("")}</tbody></table>`);
+      continue;
+    }
+    if (/^\s*(?:---+|\*\*\*+|___+)\s*$/.test(line)) { output.push("<hr>"); index += 1; continue; }
+    const heading = line.match(/^\s*(#{1,6})\s+(.+?)\s*#*\s*$/);
+    if (heading) { output.push(`<h${heading[1].length}>${inlineMarkup(heading[2])}</h${heading[1].length}>`); index += 1; continue; }
+    if (/^\s*>/.test(line)) {
+      const quote = [];
+      while (index < lines.length && /^\s*>/.test(lines[index])) quote.push(lines[index++].replace(/^\s*>\s?/, ""));
+      output.push(`<blockquote>${inlineMarkup(quote.join("\n")).replace(/\n/g, "<br>")}</blockquote>`);
+      continue;
+    }
+    if (/^\s*(?:[-*+]|\d+\.)\s+/.test(line)) {
+      const ordered = /^\s*\d+\.\s+/.test(line);
+      const items = [];
+      while (index < lines.length && new RegExp(`^\\s*${ordered ? "\\d+\\." : "[-*+]"}\\s+`).test(lines[index])) {
+        const item = lines[index++].replace(new RegExp(`^\\s*${ordered ? "\\d+\\." : "[-*+]"}\\s+`), "");
+        const task = item.match(/^\[([ xX])\]\s+(.*)$/);
+        items.push(task ? `<li class="task-item"><input type="checkbox" disabled ${task[1].toLowerCase() === "x" ? "checked" : ""}>${inlineMarkup(task[2])}</li>` : `<li>${inlineMarkup(item)}</li>`);
+      }
+      output.push(`<${ordered ? "ol" : "ul"}>${items.join("")}</${ordered ? "ol" : "ul"}>`);
+      continue;
+    }
+    const paragraph = [line];
+    index += 1;
+    while (index < lines.length && lines[index].trim() && !/^\s*(?:```|#{1,6}\s|>|[-*+]\s+|\d+\.\s+|---+$|\*\*\*+$|___+$)/.test(lines[index])) paragraph.push(lines[index++]);
+    flushParagraph(paragraph);
+  }
+  return output.join("");
 }
 
 editor.addEventListener("input", () => {
