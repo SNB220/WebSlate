@@ -1,28 +1,96 @@
 # WebSlate
 
-WebSlate is a focused, browser-based writing workspace inspired by Visual Studio Code. Write in Markdown, edit code, keep lightweight notes, and download your files when they are ready.
+<div align="center">
 
-## Run locally
+### Write. Build. Ship.
 
-Open [WebSlate](https://snb220.github.io/WebSlate/index.html) in a browser. No build step or package installation is required.
+**A calm, browser-based workspace for words, Markdown, notes, and code.**
 
-## Publish on GitHub Pages
+[Open WebSlate](https://snb220.github.io/WebSlate/index.html) · [GitHub](https://github.com/SNB220/WebSlate) · [Report an issue](https://github.com/SNB220/WebSlate/issues)
+
+</div>
+
+---
+
+## Why WebSlate?
+
+Most writing tools are either too bare or too noisy. WebSlate brings the focused feel of a text editor and the familiar comfort of a VS Code-inspired workspace into one lightweight browser app.
+
+> Your ideas belong in a space that stays out of the way.
+
+## ✨ What you can do
+
+| Write | Build | Keep control |
+| --- | --- | --- |
+| Markdown preview, notes, tables, task lists, links, and code blocks | JavaScript, CSS, plain text, and custom file extensions | Browser persistence, local imports, downloads, and no account required |
+
+### The workspace includes
+
+- **Explorer** — create, rename, import, close, and delete files
+- **Editor** — line numbers, cursor position, undo, redo, and keyboard shortcuts
+- **Markdown preview** — headings, lists, tables, task lists, links, images, quotes, dividers, and fenced code
+- **Search** — find a word across every file and jump directly to the matching line
+- **Download** — confirm and rename a file before saving it locally
+- **Themes** — switch between focused dark and light modes
+- **Responsive layout** — use WebSlate comfortably on desktop or mobile
+
+## 🚀 Get started
+
+Open [WebSlate](https://snb220.github.io/WebSlate/index.html) in your browser. There is no build step, package installation, or sign-in required.
+
+### Create your first file
+
+1. Click the **+** button in Explorer.
+2. Enter a filename, such as `ideas.md` or `app.js`.
+3. Choose an extension, or enter a custom one.
+4. Start writing.
+
+### Preview Markdown
+
+Open a `.md` file and select **Preview**. Your Markdown stays editable in the workspace, while the preview gives you a clean reading view.
+
+## ⌨️ Useful shortcuts
+
+| Action | Windows / Linux | macOS |
+| --- | --- | --- |
+| Undo | `Ctrl + Z` | `Cmd + Z` |
+| Redo | `Ctrl + Y` | `Cmd + Shift + Z` |
+| Confirm a filename | `Enter` | `Enter` |
+| Cancel a dialog | `Escape` | `Escape` |
+
+## 💾 Private by design
+
+WebSlate stores workspace files in your browser's local storage. Your writing is not uploaded by the app. Import files locally, edit them, and download your finished work whenever you are ready.
+
+## 🌐 Publish with GitHub Pages
 
 1. Push this repository to GitHub.
 2. In **Settings → Pages**, set the source to **GitHub Actions**.
-3. Open the deployed Pages URL, then choose **Extensions** in WebSlate.
-4. Drag the **WebSlate bookmarklet** button to your browser bookmarks bar, or copy its URL and create a bookmark manually.
+3. Open the deployed Pages URL.
+4. Choose **Extensions** in WebSlate to install the bookmarklet.
 
-After installation, click the bookmarklet from any page to open your personal WebSlate workspace in a new tab. Files are saved in that browser's local storage and are never uploaded.
+The bookmarklet opens your personal WebSlate workspace in a new tab from any page.
 
-## Included
+## 🧰 Run locally
 
-- VS Code-inspired workspace layout
-- File explorer with Markdown, JavaScript, CSS, and plain text examples
-- Editable text area with line numbers and cursor position
-- Markdown preview
-- Workspace search
-- New file creation
-- Download the active file
+```text
+Open index.html in a browser.
+```
 
-Files are persisted in the browser with local storage. Downloads preserve the selected file extension, including JavaScript and CSS files on mobile browsers, and repeated downloads remain available after editing. WebSlate also includes a responsive mobile layout and a saved dark/light mode preference. The repository also includes a bookmarklet installation page and GitHub Pages deployment workflow.
+No dependencies are required.
+
+## Project structure
+
+```text
+WebSlate/
+├── index.html    # Workspace markup
+├── styles.css    # Interface and responsive styling
+├── app.js        # Editor, Markdown preview, persistence, and interactions
+└── README.md     # Project documentation
+```
+
+## Made by SNB
+
+WebSlate is created and maintained by [SNB220](https://github.com/SNB220).
+
+If WebSlate helps your workflow, consider giving the project a ⭐ on [GitHub](https://github.com/SNB220/WebSlate).
