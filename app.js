@@ -38,6 +38,8 @@ const collapseSidebarButton = document.getElementById("collapseSidebarButton");
 const reopenSidebarButton = document.getElementById("reopenSidebarButton");
 const undoButton = document.getElementById("undoButton");
 const redoButton = document.getElementById("redoButton");
+const importActivityButton = document.getElementById("importActivityButton");
+const importFileInput = document.getElementById("importFileInput");
 const searchActivityButton = document.getElementById("searchActivityButton");
 const explorerContent = document.getElementById("explorerContent");
 const searchView = document.getElementById("searchView");
@@ -91,6 +93,11 @@ function iconFor(type) {
 
 function typeForExtension(extension) {
   return extension === "md" ? "markdown" : extension === "js" ? "javascript" : extension === "css" ? "css" : "text";
+}
+
+function extensionForFilename(name) {
+  const match = name.match(/\.([a-z0-9][a-z0-9_-]{0,11})$/i);
+  return match ? match[1].toLowerCase() : "txt";
 }
 
 function renderChrome() {
@@ -171,6 +178,36 @@ function showExplorerView() {
   fileTree.classList.remove("hidden");
   searchView.classList.add("hidden");
   searchActivityButton.classList.remove("active");
+}
+
+async function importFiles(selectedFiles) {
+  if (!selectedFiles.length) return;
+  try {
+    const imported = await Promise.all(Array.from(selectedFiles).map(async (file) => ({
+      name: file.name,
+      type: typeForExtension(extensionForFilename(file.name)),
+      content: await file.text()
+    })));
+    let lastImportedIndex = -1;
+    imported.forEach((importedFile) => {
+      const existingIndex = files.findIndex((file) => file.name.toLowerCase() === importedFile.name.toLowerCase());
+      if (existingIndex >= 0) {
+        files[existingIndex] = importedFile;
+        lastImportedIndex = existingIndex;
+      } else {
+        files.push(importedFile);
+        lastImportedIndex = files.length - 1;
+      }
+    });
+    showExplorerView();
+    if (lastImportedIndex >= 0) openFile(lastImportedIndex);
+    saveWorkspace();
+    showToast(`${imported.length} ${imported.length === 1 ? "file" : "files"} imported`);
+  } catch (error) {
+    showToast("Unable to import the selected file");
+  } finally {
+    importFileInput.value = "";
+  }
 }
 
 function updateLines() {
@@ -324,6 +361,8 @@ reopenSidebarButton.addEventListener("click", () => setSidebarCollapsed(false));
 document.querySelector(".activity-item[title='Explorer']").addEventListener("click", showExplorerView);
 searchActivityButton.addEventListener("click", showSearchView);
 workspaceSearch.addEventListener("input", () => renderSearchResults(workspaceSearch.value));
+importActivityButton.addEventListener("click", () => importFileInput.click());
+importFileInput.addEventListener("change", () => importFiles(importFileInput.files));
 
 function markdownToHtml(markdown) {
   const escaped = markdown.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
