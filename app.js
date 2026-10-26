@@ -1,5 +1,5 @@
 const starterFiles = [
-  { name: "README.md", type: "markdown", content: "# WebSlate\n\n## Write. Build. Ship.\n\n**A calm, browser-based workspace for words, Markdown, notes, and code.**\n\n[Open WebSlate](https://snb220.github.io/WebSlate/index.html) · [GitHub](https://github.com/SNB220/WebSlate)\n\n---\n\n> Your ideas belong in a space that stays out of the way.\n\n## ✨ What you can do\n\n| Write | Build | Keep control |\n| --- | --- | --- |\n| Markdown preview, notes, tables, and task lists | JavaScript, CSS, plain text, and custom extensions | Browser persistence, imports, downloads, and no account required |\n\n### The workspace includes\n\n- **Explorer** — create, rename, import, close, and delete files\n- **Editor** — line numbers, cursor position, undo, redo, and keyboard shortcuts\n- **Markdown preview** — headings, lists, tables, links, quotes, dividers, and code blocks\n- **Search** — find a word across every file and jump to the matching line\n- **Themes** — switch between focused dark and light modes\n\n## 🚀 Get started\n\n1. Click the **+** button in Explorer.\n2. Enter a filename, such as `ideas.md` or `app.js`.\n3. Choose an extension and start writing.\n\n## ⌨️ Useful shortcuts\n\n| Action | Shortcut |\n| --- | --- |\n| Undo | `Ctrl + Z` |\n| Redo | `Ctrl + Y` |\n| Confirm a filename | `Enter` |\n| Cancel a dialog | `Escape` |\n\n## 💾 Private by design\n\nWebSlate stores workspace files in your browser's local storage. Your writing is not uploaded by the app. Import files locally, edit them, and download your finished work whenever you are ready.\n\n## Made by SNB\n\nCreated and maintained by [SNB220](https://github.com/SNB220). If WebSlate helps your workflow, consider giving the project a ⭐ on [GitHub](https://github.com/SNB220/WebSlate)." },
+  { name: "README.md", type: "markdown", content: "# WebSlate\n\n## Write. Build. Ship.\n\n**A calm, browser-based workspace for words, Markdown, notes, and code.**\n\n[Open WebSlate](https://snb220.github.io/WebSlate/index.html) · [GitHub](https://github.com/SNB220/WebSlate)\n\n---\n\n> Your ideas belong in a space that stays out of the way.\n\n## ✨ What you can do\n\n| Write | Build | Keep control |\n| --- | --- | --- |\n| Markdown preview, notes, tables, and task lists | JavaScript, CSS, plain text, and custom extensions | Browser persistence, imports, downloads, and no account required |\n\n### The workspace includes\n\n- **Explorer** — create, rename, import, close, and delete files\n- **Editor** — line numbers, cursor position, undo, redo, and keyboard shortcuts\n- **Markdown preview** — headings, lists, tables, links, quotes, dividers, and code blocks\n- **Search** — find a word across every file and jump to the matching line\n- **Themes** — switch between focused dark and light modes\n\n## 🚀 Get started\n\n1. Click the **+** button in Explorer.\n2. Enter a filename, such as `ideas.md` or `app.js`.\n3. Choose an extension and start writing.\n\n## ⌨️ Useful shortcuts\n\n| Action | Shortcut |\n| --- | --- |\n  | Undo | `Ctrl + Z` |\n| Redo | `Ctrl + Y` |\n| Quick Preview (Markdown) | `Ctrl + Shift + P` |\n| Save workspace | `Ctrl + S` |\n| Download current file | `Ctrl + Shift + S` |\n| Close active tab | `Ctrl + W` |\n| Confirm a filename | `Enter` |\n| Cancel a dialog | `Escape` |\n\n## 💾 Private by design\n\nWebSlate stores workspace files in your browser's local storage. Your writing is not uploaded by the app. Import files locally, edit them, and download your finished work whenever you are ready.\n\n## Made by SNB\n\nCreated and maintained by [SNB220](https://github.com/SNB220). If WebSlate helps your workflow, consider giving the project a ⭐ on [GitHub](https://github.com/SNB220/WebSlate)." },
   { name: "index.js", type: "javascript", content: "const webSlate = {\n  name: \"WebSlate\",\n  version: \"1.0.0\",\n  tagline: \"Write. Build. Ship.\"\n};\n\nfunction openWorkspace() {\n  console.log(`Welcome to ${webSlate.name}`);\n}\n\nopenWorkspace();" },
   { name: "styles.css", type: "css", content: ":root {\n  --webslate-green: #42b883;\n  --webslate-ink: #0d1117;\n}\n\n.editor {\n  color: #dce5ed;\n  background: var(--webslate-ink);\n}" },
   { name: "notes.txt", type: "text", content: "A blank page is an invitation.\n\nCapture the thought before it disappears." }
@@ -488,20 +488,8 @@ document.getElementById("confirmClearButton").addEventListener("click", () => {
 clearModal.addEventListener("click", (event) => {
   if (event.target === clearModal) clearModal.classList.add("hidden");
 });
-document.addEventListener("keydown", (event) => {
-  const modifier = event.ctrlKey || event.metaKey;
-  if (!modifier || event.altKey) return;
-  if (activeIndex < 0) return;
-  if (event.key.toLowerCase() === "z") {
-    event.preventDefault();
-    restoreHistory(event.shiftKey ? 1 : -1);
-  } else if (event.key.toLowerCase() === "y") {
-    event.preventDefault();
-    restoreHistory(1);
-  }
-});
 
-document.getElementById("previewButton").addEventListener("click", () => {
+function togglePreview() {
   if (activeIndex < 0) { showToast("Open a file to preview it"); return; }
   if (files[activeIndex].type !== "markdown") { showToast("Preview is available for Markdown files"); return; }
   previewing = !previewing;
@@ -509,7 +497,37 @@ document.getElementById("previewButton").addEventListener("click", () => {
   document.getElementById("editorPane").classList.toggle("hidden", previewing);
   document.getElementById("previewButton").innerHTML = previewing ? '<span class="preview-dot on"></span> Editor' : '<span class="preview-dot"></span> Preview';
   if (previewing) markdownPreview.innerHTML = markdownToHtml(editor.value);
+}
+
+document.addEventListener("keydown", (event) => {
+  const modifier = event.ctrlKey || event.metaKey;
+  if (!modifier || event.altKey) return;
+  if (activeIndex < 0) return;
+  const key = event.key.toLowerCase();
+  if (key === "p" && event.shiftKey) {
+    event.preventDefault();
+    togglePreview();
+  } else if (key === "s" && event.shiftKey) {
+    event.preventDefault();
+    document.getElementById("downloadButton").click();
+  } else if (key === "s") {
+    event.preventDefault();
+    files[activeIndex].content = editor.value;
+    saveWorkspace();
+    showToast("All changes saved");
+  } else if (key === "w") {
+    event.preventDefault();
+    closeTab(activeIndex);
+  } else if (key === "z") {
+    event.preventDefault();
+    restoreHistory(event.shiftKey ? 1 : -1);
+  } else if (key === "y") {
+    event.preventDefault();
+    restoreHistory(1);
+  }
 });
+
+document.getElementById("previewButton").addEventListener("click", togglePreview);
 
 document.getElementById("downloadButton").addEventListener("click", () => {
   if (activeIndex < 0) { showToast("Open a file to download it"); return; }

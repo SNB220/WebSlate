@@ -55,6 +55,10 @@ Open a `.md` file and select **Preview**. Your Markdown stays editable in the wo
 | --- | --- | --- |
 | Undo | `Ctrl + Z` | `Cmd + Z` |
 | Redo | `Ctrl + Y` | `Cmd + Shift + Z` |
+| Quick Preview (Markdown) | `Ctrl + Shift + P` | `Cmd + Shift + P` |
+| Save workspace | `Ctrl + S` | `Cmd + S` |
+| Download current file | `Ctrl + Shift + S` | `Cmd + Shift + S` |
+| Close active tab | `Ctrl + W` | `Cmd + W` |
 | Confirm a filename | `Enter` | `Enter` |
 | Cancel a dialog | `Escape` | `Escape` |
 
