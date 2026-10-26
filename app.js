@@ -26,6 +26,8 @@ const toast = document.getElementById("toast");
 const themeButton = document.getElementById("themeButton");
 const closeModal = document.getElementById("closeModal");
 const closeModalMessage = document.getElementById("closeModalMessage");
+const clearModal = document.getElementById("clearModal");
+const clearModalMessage = document.getElementById("clearModalMessage");
 const newFileButton = document.getElementById("newFileButton");
 const newFileMenu = document.getElementById("newFileMenu");
 const newFileName = document.getElementById("newFileName");
@@ -466,6 +468,26 @@ editor.addEventListener("scroll", syncLineNumbers);
 
 undoButton.addEventListener("click", () => restoreHistory(-1));
 redoButton.addEventListener("click", () => restoreHistory(1));
+document.getElementById("clearButton").addEventListener("click", () => {
+  if (activeIndex < 0) { showToast("Open a file to clear it"); return; }
+  if (!editor.value) { showToast("The current file is already empty"); return; }
+  clearModalMessage.textContent = `This will remove all content from "${files[activeIndex].name}". You can undo this action afterward.`;
+  clearModal.classList.remove("hidden");
+  document.getElementById("cancelClearButton").focus();
+});
+document.getElementById("cancelClearButton").addEventListener("click", () => clearModal.classList.add("hidden"));
+document.getElementById("confirmClearButton").addEventListener("click", () => {
+  if (activeIndex < 0) return;
+  historyFor(activeIndex).lastEditAt = 0;
+  editor.value = "";
+  editor.dispatchEvent(new Event("input", { bubbles: true }));
+  clearModal.classList.add("hidden");
+  showToast("File content cleared");
+  editor.focus();
+});
+clearModal.addEventListener("click", (event) => {
+  if (event.target === clearModal) clearModal.classList.add("hidden");
+});
 document.addEventListener("keydown", (event) => {
   const modifier = event.ctrlKey || event.metaKey;
   if (!modifier || event.altKey) return;
@@ -557,6 +579,7 @@ document.addEventListener("keydown", (event) => {
   dismissAboutModal();
   downloadModal.classList.add("hidden");
   closeModal.classList.add("hidden");
+  clearModal.classList.add("hidden");
 });
 
 function createNewFile(extension) {

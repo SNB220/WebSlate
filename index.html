@@ -100,6 +100,7 @@
               <button class="toolbar-button history-button" id="undoButton" title="Undo (Ctrl+Z)" aria-label="Undo" disabled>↶ <span>Undo</span></button>
               <button class="toolbar-button history-button" id="redoButton" title="Redo (Ctrl+Y)" aria-label="Redo" disabled>↷ <span>Redo</span></button>
               <button class="toolbar-button" id="previewButton"><span class="preview-dot"></span> Preview</button>
+              <button class="toolbar-button" id="clearButton" title="Clear current file" aria-label="Clear current file">Clear</button>
               <button class="download-button" id="downloadButton">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7.5 11.5 12 16l4.5-4.5M5 20h14"></path></svg>
                 Download
@@ -129,6 +130,16 @@
           <button class="modal-button secondary" id="cancelCloseButton">Cancel</button>
           <button class="modal-button danger" id="deleteFileButton">Delete file</button>
           <button class="modal-button primary" id="saveFileButton">Save & close tab</button>
+        </div>
+      </section>
+    </div>
+    <div class="modal-backdrop hidden" id="clearModal" role="presentation">
+      <section class="close-modal" role="dialog" aria-modal="true" aria-labelledby="clearModalTitle">
+        <h2 id="clearModalTitle">Clear file?</h2>
+        <p id="clearModalMessage"></p>
+        <div class="modal-actions">
+          <button class="modal-button secondary" id="cancelClearButton">Cancel</button>
+          <button class="modal-button danger" id="confirmClearButton">Clear content</button>
         </div>
       </section>
     </div>
