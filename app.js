@@ -130,7 +130,7 @@ function renderChrome() {
   tabs.innerHTML = openTabs.map((fileIndex) => {
     const file = files[fileIndex];
     return `
-    <div class="tab ${fileIndex === activeIndex ? "active" : ""}">
+    <div class="tab ${fileIndex === activeIndex ? "active" : ""}" role="tab" tabindex="0" aria-selected="${fileIndex === activeIndex}" aria-label="${escapeHtml(file.name)} tab">
       <span class="file-icon ${file.type}">${iconFor(file.type)}</span><span class="file-name">${file.name}</span>${dirtyFiles.has(fileIndex) ? '<span class="tab-unsaved" aria-label="Unsaved changes">●</span>' : ""}
       <button class="close" data-close="${fileIndex}" aria-label="Close ${file.name}">×</button>
     </div>`;
@@ -143,7 +143,16 @@ function renderChrome() {
     event.stopPropagation();
     closeTab(Number(button.dataset.close));
   }));
-  tabs.querySelectorAll(".tab").forEach((tab) => tab.addEventListener("click", () => openFile(Number(tab.querySelector(".close").dataset.close))));
+  tabs.querySelectorAll(".tab").forEach((tab) => {
+    const openTab = () => openFile(Number(tab.querySelector(".close").dataset.close));
+    tab.addEventListener("click", openTab);
+    tab.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openTab();
+      }
+    });
+  });
   const current = files[activeIndex];
   breadcrumbs.innerHTML = current ? `<span>workspace</span><span>›</span><strong>${current.name}</strong>` : "<span>No file open</span>";
   languageStatus.textContent = current ? (current.type === "markdown" ? "Markdown" : current.type === "javascript" ? "JavaScript" : current.type === "css" ? "CSS" : "Plain Text") : "Plain Text";

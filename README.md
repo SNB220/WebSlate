@@ -32,6 +32,7 @@ Most writing tools are either too bare or too noisy. WebSlate brings the focused
 - **Search** — find a word across every file and jump directly to the matching line
 - **Download** — confirm and rename a file before saving it locally
 - **Themes** — switch between focused dark and light modes
+- **Accessibility** — keyboard-friendly navigation, visible focus states, ARIA labels, and high-contrast support
 - **Responsive layout** — use WebSlate comfortably on desktop or mobile
 
 ## 🚀 Get started

@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <a class="skip-link" href="#editor">Skip to editor</a>
     <div class="app-shell">
       <header class="topbar">
         <div class="brand">
@@ -18,7 +19,7 @@
           </div>
         </div>
         <nav class="top-nav" aria-label="Workspace navigation">
-          <button class="top-nav-item active">Workspace</button>
+          <button class="top-nav-item active" aria-current="page">Workspace</button>
           <a class="top-nav-item top-nav-link" href="bookmarklet.html">Extensions</a>
         </nav>
         <div class="top-actions">
@@ -34,7 +35,7 @@
 
       <main class="workspace">
         <aside class="activity-bar" aria-label="Activity bar">
-          <button class="activity-item active" title="Explorer" aria-label="Explorer">
+          <button class="activity-item active" title="Explorer" aria-label="Explorer" aria-current="page">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4.5h6l2 2h8v13H4z"></path><path d="M4 8h16"></path></svg>
           </button>
           <button class="activity-item" id="searchActivityButton" title="Search" aria-label="Search">
@@ -99,10 +100,10 @@
             <div class="editor-actions">
               <button class="toolbar-button history-button" id="undoButton" title="Undo (Ctrl+Z)" aria-label="Undo" disabled>↶ <span>Undo</span></button>
               <button class="toolbar-button history-button" id="redoButton" title="Redo (Ctrl+Y)" aria-label="Redo" disabled>↷ <span>Redo</span></button>
-              <button class="toolbar-button" id="previewButton"><span class="preview-dot"></span> Preview</button>
+              <button class="toolbar-button" id="previewButton" title="Preview Markdown (Ctrl+Shift+P)" aria-label="Preview Markdown"><span class="preview-dot"></span> Preview</button>
               <button class="toolbar-button hidden" id="splitButton" title="Split Editor and Preview" aria-label="Split Editor and Preview"><span class="preview-dot"></span> Split</button>
               <button class="toolbar-button" id="clearButton" title="Clear current file" aria-label="Clear current file">Clear</button>
-              <button class="download-button" id="downloadButton">
+              <button class="download-button" id="downloadButton" title="Download current file" aria-label="Download current file">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7.5 11.5 12 16l4.5-4.5M5 20h14"></path></svg>
                 Download
               </button>
@@ -113,9 +114,9 @@
               <div class="line-numbers" id="lineNumbers" aria-hidden="true"></div>
               <textarea id="editor" spellcheck="false" aria-label="Text editor"></textarea>
             </div>
-            <article class="markdown-preview hidden" id="markdownPreview"></article>
+            <article class="markdown-preview hidden" id="markdownPreview" aria-label="Markdown preview"></article>
           </div>
-          <div class="statusbar">
+          <div class="statusbar" role="status" aria-live="polite">
             <div class="status-left"><span class="status-branch">⌘ main</span><span id="statusSaveState">Saved</span><span>✓ 0</span><span>⇣ 0</span></div>
             <div class="status-right"><span id="cursorPosition">Ln 1, Col 1</span><span id="languageStatus">Markdown</span><span>UTF-8</span><span>LF</span><span>♡</span></div>
           </div>
