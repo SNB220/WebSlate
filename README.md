@@ -28,7 +28,7 @@ Most writing tools are either too bare or too noisy. WebSlate brings the focused
 
 - **Explorer** — create, rename, import, close, and delete files
 - **Editor** — line numbers, cursor position, undo, redo, keyboard shortcuts, and unsaved-change indicators
-- **Markdown preview** — headings, lists, tables, task lists, links, images, quotes, dividers, and fenced code
+- **Markdown preview** — split editing, headings, tables, task lists, footnotes, links, table of contents, and copyable highlighted code
 - **Search** — find a word across every file and jump directly to the matching line
 - **Download** — confirm and rename a file before saving it locally
 - **Themes** — switch between focused dark and light modes

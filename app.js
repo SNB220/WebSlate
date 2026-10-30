@@ -12,6 +12,7 @@ let files = starterFiles;
 let activeIndex = 0;
 let openTabs = files.map((_, index) => index);
 let previewing = false;
+let splitMode = false;
 const dirtyFiles = new Set();
 const editHistory = new Map();
 let restoringHistory = false;
@@ -21,6 +22,9 @@ const fileTree = document.getElementById("fileTree");
 const tabs = document.getElementById("tabs");
 const breadcrumbs = document.getElementById("breadcrumbs");
 const markdownPreview = document.getElementById("markdownPreview");
+const editorWrap = document.querySelector(".editor-wrap");
+const editorPane = document.getElementById("editorPane");
+const splitButton = document.getElementById("splitButton");
 const languageStatus = document.getElementById("languageStatus");
 const cursorPosition = document.getElementById("cursorPosition");
 const toast = document.getElementById("toast");
@@ -278,7 +282,7 @@ function restoreHistory(direction) {
   restoringHistory = false;
   updateLines();
   updateCursor();
-  if (previewing) markdownPreview.innerHTML = markdownToHtml(editor.value);
+  if (previewing || splitMode) markdownPreview.innerHTML = markdownToHtml(editor.value);
   updateHistoryButtons();
   saveWorkspace();
 }
@@ -295,7 +299,10 @@ function openFile(index) {
   editor.value = files[index].content;
   editor.scrollTop = 0;
   previewing = false;
+  splitMode = false;
   markdownPreview.classList.add("hidden");
+  editorWrap.classList.remove("split-mode");
+  splitButton.classList.toggle("hidden", files[index].type !== "markdown");
   document.getElementById("editorPane").classList.remove("hidden");
   document.getElementById("previewButton").innerHTML = '<span class="preview-dot"></span> Preview';
   renderChrome();
@@ -404,6 +411,28 @@ importFileInput.addEventListener("change", () => importFiles(importFileInput.fil
 
 function markdownToHtml(markdown) {
   const escape = (value) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const slugify = (value) => value.toLowerCase().replace(/<[^>]+>/g, "").replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-");
+  const highlightCode = (value, language) => {
+    let result = escape(value);
+    if (!["js", "javascript", "css", "html", "xml", "json"].includes(language.toLowerCase())) return result;
+    result = result.replace(/(&quot;.*?&quot;|&#039;.*?&#039;|".*?"|'.*?')/g, '<span class="code-string">$1</span>');
+    result = result.replace(/(\/\/.*|\/\*.*?\*\/|<!--.*?-->)/g, '<span class="code-comment">$1</span>');
+    result = result.replace(/\b(const|let|var|function|return|if|else|for|while|new|class|import|from|true|false|null)\b/g, '<span class="code-keyword">$1</span>');
+    return result;
+  };
+  const footnotes = new Map();
+  const lines = markdown.replace(/\r\n?/g, "\n").split("\n").filter((line) => {
+    const definition = line.match(/^\[\^([^\]]+)\]:\s*(.+)$/);
+    if (!definition) return true;
+    footnotes.set(definition[1], definition[2]);
+    return false;
+  });
+  const headings = lines.map((line) => line.match(/^\s*(#{1,6})\s+(.+?)\s*#*\s*$/)).filter(Boolean).map((heading) => ({
+    level: heading[1].length,
+    text: heading[2],
+    id: slugify(heading[2])
+  }));
+  const usedFootnotes = [];
   const inlineMarkup = (value) => {
     let result = escape(value);
     result = result.replace(/!\[([^\]]*)\]\((https?:\/\/[^)\s]+|\/[^)\s]+|#[^)\s]+)\)/g, '<img src="$2" alt="$1">');
@@ -412,9 +441,13 @@ function markdownToHtml(markdown) {
     result = result.replace(/\*\*(.*?)\*\*|__(.*?)__/g, (_, bold, underlined) => `<strong>${bold || underlined}</strong>`);
     result = result.replace(/~~(.*?)~~/g, "<del>$1</del>");
     result = result.replace(/\*([^*\n]+)\*|_([^_\n]+)_/g, (_, italic, underscored) => `<em>${italic || underscored}</em>`);
+    result = result.replace(/\[\^([^\]]+)\]/g, (_, id) => {
+      if (!footnotes.has(id)) return `[^${id}]`;
+      if (!usedFootnotes.includes(id)) usedFootnotes.push(id);
+      return `<sup class="footnote-ref" id="fnref-${id}"><a href="#fn-${id}">[${usedFootnotes.indexOf(id) + 1}]</a></sup>`;
+    });
     return result;
   };
-  const lines = markdown.replace(/\r\n?/g, "\n").split("\n");
   const output = [];
   let index = 0;
   const isTableSeparator = (line) => /^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(line);
@@ -427,13 +460,19 @@ function markdownToHtml(markdown) {
   while (index < lines.length) {
     const line = lines[index];
     if (!line.trim()) { index += 1; continue; }
+    if (/^\s*\[\[toc\]\]\s*$/i.test(line)) {
+      output.push(`<nav class="toc" aria-label="Table of contents"><div class="toc-title">Table of contents</div><ul>${headings.map((heading) => `<li style="margin-left:${(heading.level - 1) * 14}px"><a href="#${heading.id}">${inlineMarkup(heading.text)}</a></li>`).join("")}</ul></nav>`);
+      index += 1;
+      continue;
+    }
     if (/^\s*```/.test(line)) {
       const language = line.trim().slice(3).trim();
       index += 1;
       const code = [];
       while (index < lines.length && !/^\s*```/.test(lines[index])) code.push(lines[index++]);
       if (index < lines.length) index += 1;
-      output.push(`<pre${language ? ` data-language="${escape(language)}"` : ""}><code>${escape(code.join("\n"))}</code></pre>`);
+      const languageLabel = language ? `<span class="code-language">${escape(language)}</span>` : "";
+      output.push(`<pre${language ? ` data-language="${escape(language)}"` : ""}>${languageLabel}<button class="code-copy" type="button">Copy</button><code>${highlightCode(code.join("\n"), language)}</code></pre>`);
       continue;
     }
     if (index + 1 < lines.length && line.includes("|") && isTableSeparator(lines[index + 1])) {
@@ -451,7 +490,7 @@ function markdownToHtml(markdown) {
     }
     if (/^\s*(?:---+|\*\*\*+|___+)\s*$/.test(line)) { output.push("<hr>"); index += 1; continue; }
     const heading = line.match(/^\s*(#{1,6})\s+(.+?)\s*#*\s*$/);
-    if (heading) { output.push(`<h${heading[1].length}>${inlineMarkup(heading[2])}</h${heading[1].length}>`); index += 1; continue; }
+    if (heading) { output.push(`<h${heading[1].length} id="${slugify(heading[2])}">${inlineMarkup(heading[2])}</h${heading[1].length}>`); index += 1; continue; }
     if (/^\s*>/.test(line)) {
       const quote = [];
       while (index < lines.length && /^\s*>/.test(lines[index])) quote.push(lines[index++].replace(/^\s*>\s?/, ""));
@@ -474,6 +513,9 @@ function markdownToHtml(markdown) {
     while (index < lines.length && lines[index].trim() && !/^\s*(?:```|#{1,6}\s|>|[-*+]\s+|\d+\.\s+|---+$|\*\*\*+$|___+$)/.test(lines[index])) paragraph.push(lines[index++]);
     flushParagraph(paragraph);
   }
+  if (usedFootnotes.length) {
+    output.push(`<section class="footnotes"><ol>${usedFootnotes.map((id) => `<li id="fn-${id}">${inlineMarkup(footnotes.get(id))} <a class="footnote-backref" href="#fnref-${id}" aria-label="Back to reference">↩</a></li>`).join("")}</ol></section>`);
+  }
   return output.join("");
 }
 
@@ -483,7 +525,7 @@ editor.addEventListener("input", () => {
   dirtyFiles.add(activeIndex);
   updateLines();
   updateCursor();
-  if (previewing) markdownPreview.innerHTML = markdownToHtml(editor.value);
+  if (previewing || splitMode) markdownPreview.innerHTML = markdownToHtml(editor.value);
   recordEdit();
   renderChrome();
   saveWorkspace();
@@ -491,6 +533,19 @@ editor.addEventListener("input", () => {
 editor.addEventListener("click", updateCursor);
 editor.addEventListener("keyup", updateCursor);
 editor.addEventListener("scroll", syncLineNumbers);
+
+markdownPreview.addEventListener("click", async (event) => {
+  const copyButton = event.target.closest(".code-copy");
+  if (!copyButton) return;
+  const code = copyButton.parentElement.querySelector("code").textContent;
+  try {
+    await navigator.clipboard.writeText(code);
+    copyButton.textContent = "Copied";
+    setTimeout(() => { copyButton.textContent = "Copy"; }, 1200);
+  } catch (error) {
+    showToast("Unable to copy code");
+  }
+});
 
 undoButton.addEventListener("click", () => restoreHistory(-1));
 redoButton.addEventListener("click", () => restoreHistory(1));
@@ -518,6 +573,8 @@ clearModal.addEventListener("click", (event) => {
 function togglePreview() {
   if (activeIndex < 0) { showToast("Open a file to preview it"); return; }
   if (files[activeIndex].type !== "markdown") { showToast("Preview is available for Markdown files"); return; }
+  splitMode = false;
+  editorWrap.classList.remove("split-mode");
   previewing = !previewing;
   markdownPreview.classList.toggle("hidden", !previewing);
   document.getElementById("editorPane").classList.toggle("hidden", previewing);
@@ -555,6 +612,17 @@ document.addEventListener("keydown", (event) => {
 });
 
 document.getElementById("previewButton").addEventListener("click", togglePreview);
+splitButton.addEventListener("click", () => {
+  if (activeIndex < 0 || files[activeIndex].type !== "markdown") return;
+  splitMode = !splitMode;
+  previewing = false;
+  editorWrap.classList.toggle("split-mode", splitMode);
+  editorPane.classList.remove("hidden");
+  markdownPreview.classList.toggle("hidden", !splitMode);
+  splitButton.innerHTML = splitMode ? '<span class="preview-dot on"></span> Split' : '<span class="preview-dot"></span> Split';
+  document.getElementById("previewButton").innerHTML = '<span class="preview-dot"></span> Preview';
+  if (splitMode) markdownPreview.innerHTML = markdownToHtml(editor.value);
+});
 
 document.getElementById("downloadButton").addEventListener("click", () => {
   if (activeIndex < 0) { showToast("Open a file to download it"); return; }
@@ -719,4 +787,5 @@ renderChrome();
 updateLines();
 updateCursor();
 updateHistoryButtons();
+splitButton.classList.toggle("hidden", activeIndex < 0 || files[activeIndex].type !== "markdown");
 if (!localStorage.getItem(WELCOME_KEY)) showAboutModal();
