@@ -161,10 +161,14 @@ body[data-theme="light"] .file-item.active {
   background: #d9f2e7 !important;
 }
 .sidebar-footer { margin-top: auto; display: flex; align-items: center; gap: 8px; height: 42px; padding: 0 17px; color: #6f7d8a; border-top: 1px solid var(--border); font-size: 11px; }
+.sidebar-footer.unsaved { color: #b68750; }
+.sidebar-footer.unsaved .sync-dot { background: #d99a4e; box-shadow: 0 0 8px #d99a4e99; }
 .sync-dot { width: 7px; height: 7px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px #42b88399; }
 .editor-area { display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; background: var(--editor); }
 .tabs { display: flex; height: 40px; background: var(--panel); border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: thin; }
 .tab { min-width: 135px; max-width: 190px; display: flex; align-items: center; gap: 9px; padding: 0 14px; border-right: 1px solid var(--border); color: var(--muted); background: var(--panel); position: relative; }
+.tab-unsaved { margin-left: auto; color: var(--accent); font-size: 9px; line-height: 1; }
+.tab-unsaved + .close { margin-left: 0; }
 .tab.active { color: var(--text); background: var(--editor); }.tab.active::after { content: ""; position: absolute; bottom: -1px; left: 0; right: 0; height: 1px; background: var(--accent); }
 body[data-theme="light"] .tab.active { color: var(--text); background: var(--editor); }
 .tab .close { margin-left: auto; color: #788694; font-size: 15px; }.tab .close:hover { color: white; }

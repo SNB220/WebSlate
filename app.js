@@ -12,6 +12,7 @@ let files = starterFiles;
 let activeIndex = 0;
 let openTabs = files.map((_, index) => index);
 let previewing = false;
+const dirtyFiles = new Set();
 const editHistory = new Map();
 let restoringHistory = false;
 const editor = document.getElementById("editor");
@@ -48,6 +49,8 @@ const searchView = document.getElementById("searchView");
 const workspaceSearch = document.getElementById("workspaceSearch");
 const searchSummary = document.getElementById("searchSummary");
 const searchResults = document.getElementById("searchResults");
+const saveStatus = document.getElementById("saveStatus");
+const statusSaveState = document.getElementById("statusSaveState");
 let pendingCloseIndex = -1;
 
 function applyTheme(theme) {
@@ -66,12 +69,21 @@ function toggleTheme() {
 applyTheme(localStorage.getItem(THEME_KEY) === "light" ? "light" : "dark");
 themeButton.addEventListener("click", toggleTheme);
 
-function saveWorkspace() {
+function saveWorkspace(clearDirty = false) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
     files,
     openTabs,
     activeIndex
   }));
+  if (clearDirty) dirtyFiles.clear();
+  updateSaveStatus();
+}
+
+function updateSaveStatus() {
+  const hasUnsavedChanges = dirtyFiles.size > 0;
+  saveStatus.textContent = hasUnsavedChanges ? "Unsaved changes" : "All changes saved";
+  saveStatus.parentElement.classList.toggle("unsaved", hasUnsavedChanges);
+  statusSaveState.textContent = hasUnsavedChanges ? "Unsaved" : "Saved";
 }
 
 function loadWorkspace() {
@@ -115,7 +127,7 @@ function renderChrome() {
     const file = files[fileIndex];
     return `
     <div class="tab ${fileIndex === activeIndex ? "active" : ""}">
-      <span class="file-icon ${file.type}">${iconFor(file.type)}</span><span class="file-name">${file.name}</span>
+      <span class="file-icon ${file.type}">${iconFor(file.type)}</span><span class="file-name">${file.name}</span>${dirtyFiles.has(fileIndex) ? '<span class="tab-unsaved" aria-label="Unsaved changes">●</span>' : ""}
       <button class="close" data-close="${fileIndex}" aria-label="Close ${file.name}">×</button>
     </div>`;
   }).join("");
@@ -131,6 +143,7 @@ function renderChrome() {
   const current = files[activeIndex];
   breadcrumbs.innerHTML = current ? `<span>workspace</span><span>›</span><strong>${current.name}</strong>` : "<span>No file open</span>";
   languageStatus.textContent = current ? (current.type === "markdown" ? "Markdown" : current.type === "javascript" ? "JavaScript" : current.type === "css" ? "CSS" : "Plain Text") : "Plain Text";
+  updateSaveStatus();
 }
 
 function escapeHtml(value) {
@@ -199,6 +212,7 @@ async function importFiles(selectedFiles) {
       const existingIndex = files.findIndex((file) => file.name.toLowerCase() === importedFile.name.toLowerCase());
       if (existingIndex >= 0) {
         files[existingIndex] = importedFile;
+        dirtyFiles.delete(existingIndex);
         lastImportedIndex = existingIndex;
       } else {
         files.push(importedFile);
@@ -260,6 +274,7 @@ function restoreHistory(direction) {
   restoringHistory = true;
   editor.value = history.entries[history.position];
   files[activeIndex].content = editor.value;
+  dirtyFiles.add(activeIndex);
   restoringHistory = false;
   updateLines();
   updateCursor();
@@ -306,7 +321,16 @@ function finishCloseTab(fileIndex, shouldDelete) {
   openTabs.splice(tabPosition, 1);
   if (shouldDelete) {
     files.splice(fileIndex, 1);
+    dirtyFiles.delete(fileIndex);
+    [...dirtyFiles].forEach((index) => {
+      if (index > fileIndex) {
+        dirtyFiles.delete(index);
+        dirtyFiles.add(index - 1);
+      }
+    });
     openTabs = openTabs.map((index) => index > fileIndex ? index - 1 : index);
+  } else {
+    dirtyFiles.delete(fileIndex);
   }
   if (activeIndex === fileIndex) {
     const nextFileIndex = openTabs[tabPosition] ?? openTabs[tabPosition - 1] ?? -1;
@@ -456,10 +480,12 @@ function markdownToHtml(markdown) {
 editor.addEventListener("input", () => {
   if (activeIndex < 0) return;
   files[activeIndex].content = editor.value;
+  dirtyFiles.add(activeIndex);
   updateLines();
   updateCursor();
   if (previewing) markdownPreview.innerHTML = markdownToHtml(editor.value);
   recordEdit();
+  renderChrome();
   saveWorkspace();
 });
 editor.addEventListener("click", updateCursor);
@@ -513,7 +539,8 @@ document.addEventListener("keydown", (event) => {
   } else if (key === "s") {
     event.preventDefault();
     files[activeIndex].content = editor.value;
-    saveWorkspace();
+    saveWorkspace(true);
+    renderChrome();
     showToast("All changes saved");
   } else if (key === "w") {
     event.preventDefault();

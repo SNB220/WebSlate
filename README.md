@@ -27,7 +27,7 @@ Most writing tools are either too bare or too noisy. WebSlate brings the focused
 ### The workspace includes
 
 - **Explorer** — create, rename, import, close, and delete files
-- **Editor** — line numbers, cursor position, undo, redo, and keyboard shortcuts
+- **Editor** — line numbers, cursor position, undo, redo, keyboard shortcuts, and unsaved-change indicators
 - **Markdown preview** — headings, lists, tables, task lists, links, images, quotes, dividers, and fenced code
 - **Search** — find a word across every file and jump directly to the matching line
 - **Download** — confirm and rename a file before saving it locally
