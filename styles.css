@@ -164,6 +164,10 @@ body[data-theme="light"] .file-item.active {
   color: #16352b !important;
   background: #d9f2e7 !important;
 }
+body[data-theme="light"] .file-item:hover {
+  color: var(--text);
+  background: #eef6f3;
+}
 .sidebar-footer { margin-top: auto; display: flex; align-items: center; gap: 8px; height: 42px; padding: 0 17px; color: #6f7d8a; border-top: 1px solid var(--border); font-size: 11px; }
 .sidebar-footer.unsaved { color: #b68750; }
 .sidebar-footer.unsaved .sync-dot { background: #d99a4e; box-shadow: 0 0 8px #d99a4e99; }
