@@ -273,11 +273,23 @@ body[data-theme="light"] .tab.active { color: var(--text); background: var(--edi
   .sidebar.hidden { display: none; }
   .sidebar-reopen { position: absolute; z-index: 3; left: 45px; margin-top: 47px; }
   .editor-toolbar { height: 48px; padding: 0 10px; }
-  .editor-actions { gap: 4px; }
+  .editor-toolbar { min-width: 0; overflow: hidden; }
+  .breadcrumbs { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .editor-actions { flex: 0 0 auto; max-width: 100%; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+  .editor-actions::-webkit-scrollbar { display: none; }
   .toolbar-button, .download-button { height: 34px; padding: 0 9px; }
   .tabs { height: 42px; }
   .tab { min-width: 125px; padding: 0 10px; }
   .editor-wrap { overflow: hidden; overscroll-behavior: contain; }
+  .editor-wrap.split-mode { flex-direction: column; overflow-y: auto; }
+  .editor-wrap.split-mode .editor-pane,
+  .editor-wrap.split-mode .markdown-preview {
+    width: 100%;
+    min-height: 50%;
+    flex: 0 0 50%;
+  }
+  .editor-wrap.split-mode .editor-pane { border-right: 0; border-bottom: 1px solid var(--border); }
+  .editor-wrap.split-mode .markdown-preview { padding: 24px 18px; }
   .editor-pane { min-height: 0; padding-top: 10px; overflow: visible; }
   .line-numbers { width: 39px; flex-basis: 39px; padding-right: 10px; font-size: 12px; line-height: 23px; }
   #editor { padding: 0 14px 24px 4px; font-size: 12px; line-height: 23px; touch-action: pan-x pan-y; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
