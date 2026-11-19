@@ -224,6 +224,24 @@ function updateSaveStatus() {
   statusSaveState.textContent = hasUnsavedChanges ? "Unsaved" : "Saved";
 }
 
+function updateUnsavedTabIndicators() {
+  tabs.querySelectorAll(".tab").forEach((tab) => {
+    const closeButton = tab.querySelector(".close");
+    if (!closeButton) return;
+    const fileIndex = Number(closeButton.dataset.close);
+    let indicator = tab.querySelector(".tab-unsaved");
+    if (dirtyFiles.has(fileIndex) && !indicator) {
+      indicator = document.createElement("span");
+      indicator.className = "tab-unsaved";
+      indicator.setAttribute("aria-label", "Unsaved changes");
+      indicator.textContent = "●";
+      tab.insertBefore(indicator, closeButton);
+    } else if (!dirtyFiles.has(fileIndex) && indicator) {
+      indicator.remove();
+    }
+  });
+}
+
 function loadWorkspace() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
@@ -818,7 +836,8 @@ editor.addEventListener("input", () => {
   updateCursor();
   if (previewing || splitMode) markdownPreview.innerHTML = markdownToHtml(editor.value);
   recordEdit();
-  renderChrome();
+  updateSaveStatus();
+  updateUnsavedTabIndicators();
   saveWorkspace();
 });
 editor.addEventListener("click", updateCursor);
