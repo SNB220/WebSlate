@@ -324,6 +324,24 @@ body[data-theme="light"] .tab.active { color: var(--text); background: var(--edi
 .statusbar { height: 24px; display: flex; align-items: center; justify-content: space-between; padding: 0 13px; color: #9eacb8; background: #173d35; font-size: 10px; }
 .status-left, .status-right { display: flex; align-items: center; gap: 16px; }.status-branch { color: #d2eee3; }
 .toast { position: fixed; bottom: 38px; left: 50%; padding: 9px 14px; transform: translate(-50%, 15px); border: 1px solid #385248; border-radius: 5px; color: #d7f6e8; background: #19352e; opacity: 0; pointer-events: none; transition: .2s ease; font-size: 12px; }.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.action-effects { position: fixed; inset: 0; z-index: 30; overflow: hidden; pointer-events: none; }
+.action-particle { position: absolute; left: var(--x); top: var(--y); width: var(--size); height: var(--size); border: 1px solid #b9ffd9; border-radius: 50%; background: var(--color); box-shadow: 0 0 10px var(--glow); opacity: 0; animation: action-burst .75s cubic-bezier(.12,.72,.25,1) forwards; }
+.action-particle.square { border-radius: 2px; }
+.action-ring { position: absolute; left: var(--x); top: var(--y); width: 12px; height: 12px; border: 2px solid var(--accent-bright); border-radius: 50%; opacity: 0; transform: translate(-50%, -50%) scale(.2); animation: action-ring .68s ease-out forwards; }
+.action-ripple { position: absolute; left: var(--x); top: var(--y); width: 80px; height: 80px; border: 1px solid #42b88355; border-radius: 50%; opacity: 0; transform: translate(-50%, -50%) scale(.2); animation: action-ripple 1s ease-out forwards; }
+@keyframes action-burst {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(.2) rotate(0); }
+  72% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(.85) rotate(var(--spin)); }
+}
+@keyframes action-ring {
+  0% { opacity: .9; transform: translate(-50%, -50%) scale(.2); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(6); }
+}
+@keyframes action-ripple {
+  0% { opacity: .7; transform: translate(-50%, -50%) scale(.2); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(5); }
+}
 .modal-backdrop { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; background: #05080bcc; animation: backdrop-reveal .18s ease-out both; }
 @keyframes backdrop-reveal {
   from { opacity: 0; }

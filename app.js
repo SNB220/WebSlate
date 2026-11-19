@@ -61,7 +61,53 @@ const searchSummary = document.getElementById("searchSummary");
 const searchResults = document.getElementById("searchResults");
 const saveStatus = document.getElementById("saveStatus");
 const statusSaveState = document.getElementById("statusSaveState");
+const actionEffects = document.getElementById("actionEffects");
 let pendingCloseIndex = -1;
+
+function triggerActionBurst(source, options = {}) {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const rect = typeof source?.getBoundingClientRect === "function" ? source.getBoundingClientRect() : null;
+  const x = rect ? rect.left + rect.width / 2 : window.innerWidth / 2;
+  const y = rect ? rect.top + rect.height / 2 : window.innerHeight / 2;
+  const count = options.count || 18;
+  const colors = options.colors || ["#42b883", "#5de0a4", "#a8f0cb", "#d7fff0"];
+
+  const ring = document.createElement("span");
+  ring.className = "action-ring";
+  ring.style.setProperty("--x", `${x}px`);
+  ring.style.setProperty("--y", `${y}px`);
+  actionEffects.appendChild(ring);
+
+  if (options.ripple) {
+    const ripple = document.createElement("span");
+    ripple.className = "action-ripple";
+    ripple.style.setProperty("--x", `${x}px`);
+    ripple.style.setProperty("--y", `${y}px`);
+    actionEffects.appendChild(ripple);
+  }
+
+  for (let index = 0; index < count; index += 1) {
+    const particle = document.createElement("span");
+    const angle = (Math.PI * 2 * index) / count + (Math.random() - .5) * .35;
+    const distance = (options.distance || 70) * (.55 + Math.random() * .75);
+    const size = 3 + Math.random() * (options.size || 5);
+    particle.className = `action-particle ${Math.random() > .55 ? "square" : ""}`;
+    particle.style.setProperty("--x", `${x}px`);
+    particle.style.setProperty("--y", `${y}px`);
+    particle.style.setProperty("--dx", `${Math.cos(angle) * distance}px`);
+    particle.style.setProperty("--dy", `${Math.sin(angle) * distance + (options.rise || 8)}px`);
+    particle.style.setProperty("--size", `${size}px`);
+    particle.style.setProperty("--spin", `${(Math.random() > .5 ? 1 : -1) * (120 + Math.random() * 260)}deg`);
+    particle.style.setProperty("--color", colors[index % colors.length]);
+    particle.style.setProperty("--glow", `${colors[index % colors.length]}66`);
+    actionEffects.appendChild(particle);
+  }
+
+  setTimeout(() => {
+    ring.remove();
+    actionEffects.querySelectorAll(".action-particle, .action-ripple").forEach((element) => element.remove());
+  }, 1100);
+}
 
 function applyTheme(theme) {
   document.body.dataset.theme = theme;
@@ -115,6 +161,7 @@ function exportWorkspace() {
     link.remove();
   }, 10000);
   saveWorkspace();
+  triggerActionBurst(exportWorkspaceButton, { count: 28, distance: 105, size: 7, ripple: true });
   showToast("Workspace exported");
 }
 
@@ -161,6 +208,7 @@ async function importWorkspace(file) {
   if (!file) return;
   try {
     applyImportedWorkspace(JSON.parse(await file.text()));
+    triggerActionBurst(importWorkspaceButton, { count: 26, distance: 96, size: 7, ripple: true });
     showToast("Workspace imported");
   } catch (error) {
     showToast(error.message === "Unsupported WebSlate backup" || error.message === "Backup contains no files" ? error.message : "Unable to read workspace backup");
@@ -970,6 +1018,7 @@ function createNewFile(extension) {
   files.push({ name, type, content, folderId: newFileFolder.value, pinned: false });
   openFile(files.length - 1);
   saveWorkspace();
+  triggerActionBurst(newFileButton, { count: 22, distance: 88, size: 6, ripple: true });
   newFileName.value = "untitled";
   customExtension.value = "";
   newFileMenu.classList.add("hidden");
@@ -991,6 +1040,7 @@ function createNewFolder() {
   folders.push({ id: `folder-${Date.now()}`, name: normalizedName, collapsed: false });
   renderChrome();
   saveWorkspace();
+  triggerActionBurst(newFolderButton, { count: 24, distance: 92, size: 6, ripple: true });
   showToast(`${normalizedName} folder created`);
 }
 
