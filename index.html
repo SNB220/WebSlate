@@ -75,6 +75,10 @@
                 <div class="new-file-title">New file</div>
                 <label class="new-file-name-label" for="newFileName">File name</label>
                 <input id="newFileName" class="new-file-name" type="text" maxlength="80" value="untitled" placeholder="e.g. app" />
+                <label class="new-file-name-label" for="newFileFolder">Folder</label>
+                <select id="newFileFolder" class="new-file-folder">
+                  <option value="">Workspace root</option>
+                </select>
                 <button class="file-type-option" data-extension="md" role="menuitem"><span class="file-icon markdown">M</span> Markdown <span>.md</span></button>
                 <button class="file-type-option" data-extension="js" role="menuitem"><span class="file-icon javascript">JS</span> JavaScript <span>.js</span></button>
                 <button class="file-type-option" data-extension="css" role="menuitem"><span class="file-icon css">#</span> CSS <span>.css</span></button>
@@ -86,6 +90,9 @@
                   </div>
                 </div>
               </div>
+              <button class="plain-icon folder-button" id="newFolderButton" title="New folder" aria-label="New folder">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 6.5h6l2 2h9v10h-17z"></path><path d="M3.5 9h17"></path></svg>
+              </button>
             </div>
           </div>
           <div class="workspace-name" id="explorerContent">WEBSLATE WORKSPACE</div>

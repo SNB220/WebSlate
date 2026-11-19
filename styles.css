@@ -139,6 +139,7 @@ svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-lineca
 .sidebar-heading { height: 47px; padding: 0 13px 0 18px; display: flex; align-items: center; justify-content: space-between; text-transform: uppercase; letter-spacing: .08em; font-size: 10px; font-weight: 600; color: var(--soft); }
 .sidebar-actions { display: flex; align-items: center; gap: 2px; }.collapse-button { position: absolute; z-index: 3; top: 50%; right: -16px; width: 30px; height: 62px; display: grid; place-items: center; padding: 0; transform: translateY(-50%); border: 1px solid var(--border); border-radius: 10px; box-shadow: 4px 0 12px var(--shadow); color: var(--muted); background: var(--panel); font-family: Arial, sans-serif; font-size: 23px; font-weight: 300; line-height: 1; text-align: center; transition: color .2s ease, background-color .2s ease, border-color .2s ease, box-shadow .2s ease; }.collapse-button:hover { color: var(--accent); background: var(--panel-raised); border-color: var(--accent); box-shadow: 5px 0 16px var(--shadow); }.sidebar-reopen { width: 25px; height: 34px; align-self: flex-start; margin-top: 47px; border: 1px solid var(--border); border-left: 0; border-radius: 0 5px 5px 0; color: var(--muted); background: var(--panel); font-size: 24px; line-height: 1; }.sidebar-reopen:hover { color: var(--text); background: #1b2933; }
 .plain-icon { width: 24px; height: 24px; font-family: Arial, sans-serif; font-size: 19px; line-height: 24px; border-radius: 4px; }
+.folder-button svg { width: 17px; height: 17px; stroke-width: 1.7; }
 .new-file-button { padding: 0; text-align: center; }
 .new-file-control { position: relative; }
 .new-file-menu { position: absolute; z-index: 5; top: 31px; right: 0; width: 220px; padding: 7px; border: 1px solid var(--border); border-radius: 6px; background: var(--panel-raised); box-shadow: 0 12px 30px var(--shadow); text-transform: none; letter-spacing: normal; }
@@ -151,18 +152,29 @@ svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-lineca
 .file-type-option span:last-child { margin-left: auto; color: #738391; font-size: 11px; }
 .custom-extension { display: flex; align-items: center; gap: 6px; margin-top: 6px; padding: 7px 5px 2px; border-top: 1px solid #2b3945; }
 .custom-extension-label { color: #9eacb8; font-size: 11px; }
+.new-file-folder { width: 100%; height: 28px; margin-bottom: 6px; padding: 3px 7px; border: 1px solid #40515e; border-radius: 3px; outline: 0; color: var(--text); background: #0e161d; font: 12px inherit; }
+.new-file-folder:focus { border-color: var(--accent); }
 #customExtension { width: 47px; height: 24px; padding: 2px 5px; border: 1px solid #40515e; border-radius: 3px; outline: 0; color: var(--text); background: #0e161d; font: 11px inherit; }
 #customExtension:focus { border-color: var(--accent); }
 #createCustomFile { height: 24px; padding: 0 7px; border-radius: 3px; color: #09140f; background: var(--accent); font-size: 11px; font-weight: 600; }
 #createCustomFile:hover { background: var(--accent-bright); }
 .workspace-name { padding: 11px 18px 8px; color: #7f8e9d; font-size: 10px; font-weight: 700; letter-spacing: .08em; }
 .file-tree { padding: 3px 7px; }
-.file-item { display: flex; align-items: center; width: 100%; height: 31px; padding: 0 10px; gap: 9px; border-radius: 4px; color: #aebac5; background: transparent; text-align: left; }
+.folder-group + .folder-group { margin-top: 5px; }
+.folder-heading { display: flex; align-items: center; width: 100%; height: 27px; padding: 0 8px; gap: 6px; border-radius: 4px; color: var(--soft); background: transparent; font-size: 10px; font-weight: 700; text-align: left; }
+.folder-heading:hover { color: var(--text); background: #1a2631; }
+.folder-chevron { width: 10px; color: var(--muted); font-size: 16px; line-height: 1; }
+.folder-symbol { color: var(--accent); font-size: 13px; }
+.folder-files { min-height: 4px; }
+.file-item { display: flex; align-items: center; width: 100%; height: 31px; padding: 0 8px 0 18px; gap: 9px; border-radius: 4px; color: #aebac5; background: transparent; text-align: left; }
 .file-item:hover { background: #1a2631; color: var(--text); }
 .file-item.active { background: #20352f; color: #dff8ed; }
+.file-item.dragging { opacity: .45; }
 .search-view { padding: 5px 12px; overflow: auto; }.search-label { display: block; padding: 8px 6px 7px; color: #8b9aa7; font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }.search-input-wrap { display: flex; align-items: center; gap: 7px; height: 31px; padding: 0 8px; border: 1px solid #3b4d5a; border-radius: 4px; background: #0d151c; }.search-input-wrap:focus-within { border-color: var(--accent); }.search-input-wrap svg { width: 15px; height: 15px; color: #71818e; }.search-input-wrap input { min-width: 0; flex: 1; border: 0; outline: 0; color: var(--text); background: transparent; font: 12px inherit; }.search-summary { padding: 13px 3px 7px; color: #82919d; font-size: 10px; }.search-result { display: block; width: 100%; padding: 8px 7px; border-radius: 4px; color: #bdc9d1; background: transparent; text-align: left; }.search-result:hover { background: #1a2a32; }.search-result-file { display: flex; align-items: center; gap: 7px; color: #e0ebe8; font-size: 11px; font-weight: 600; }.search-result-count { margin-left: auto; color: #78958d; font-size: 10px; font-weight: 400; }.search-result-match { display: block; overflow: hidden; margin-top: 4px; color: #84949f; font: 10px/1.4 Consolas, monospace; text-overflow: ellipsis; white-space: nowrap; }.search-result-match mark { padding: 1px 2px; border-radius: 2px; color: #e5fff4; background: #2c6d5a; }
 .file-icon { width: 14px; text-align: center; font-size: 11px; font-weight: 700; }
 .file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pin-toggle { margin-left: auto; padding: 2px 3px; color: #71818e; font-size: 14px; line-height: 1; }
+.pin-toggle:hover, .pin-toggle.pinned { color: #e4bd5e; }
 .file-icon.markdown { color: #70b7ff; }.file-icon.javascript { color: #f0ce69; }.file-icon.css { color: #e28bff; }.file-icon.text { color: #9faab6; }
 body[data-theme="light"] .file-item.active {
   color: #16352b !important;

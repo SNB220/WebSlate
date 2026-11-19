@@ -9,6 +9,7 @@ const STORAGE_KEY = "slate-workspace-v1";
 const WELCOME_KEY = "slate-welcome-seen-v1";
 const THEME_KEY = "slate-theme-v1";
 let files = starterFiles;
+let folders = [];
 let activeIndex = 0;
 let openTabs = files.map((_, index) => index);
 let previewing = false;
@@ -36,6 +37,8 @@ const clearModalMessage = document.getElementById("clearModalMessage");
 const newFileButton = document.getElementById("newFileButton");
 const newFileMenu = document.getElementById("newFileMenu");
 const newFileName = document.getElementById("newFileName");
+const newFileFolder = document.getElementById("newFileFolder");
+const newFolderButton = document.getElementById("newFolderButton");
 const customExtension = document.getElementById("customExtension");
 const downloadModal = document.getElementById("downloadModal");
 const downloadFileName = document.getElementById("downloadFileName");
@@ -76,6 +79,7 @@ themeButton.addEventListener("click", toggleTheme);
 function saveWorkspace(clearDirty = false) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
     files,
+    folders,
     openTabs,
     activeIndex
   }));
@@ -96,6 +100,8 @@ function loadWorkspace() {
     if (!saved || !Array.isArray(saved.files)) return;
     files = saved.files.filter((file) => file && typeof file.name === "string" && typeof file.content === "string");
     if (!files.length) files = starterFiles;
+    folders = Array.isArray(saved.folders) ? saved.folders.filter((folder) => folder && typeof folder.id === "string" && typeof folder.name === "string").map((folder) => ({ ...folder, collapsed: Boolean(folder.collapsed) })) : [];
+    files = files.map((file) => ({ ...file, folderId: folders.some((folder) => folder.id === file.folderId) ? file.folderId : "", pinned: Boolean(file.pinned) }));
     const savedReadme = files.find((file) => file.name.toLowerCase() === "readme.md");
     if (savedReadme && savedReadme.content.startsWith("# Welcome to WebSlate\n\nA focused workspace")) {
       savedReadme.content = starterFiles[0].content;
@@ -104,6 +110,7 @@ function loadWorkspace() {
     activeIndex = Number.isInteger(saved.activeIndex) && saved.activeIndex >= 0 && saved.activeIndex < files.length ? saved.activeIndex : -1;
   } catch (error) {
     files = starterFiles;
+    folders = [];
     openTabs = files.map((_, index) => index);
     activeIndex = 0;
   }
@@ -123,10 +130,24 @@ function extensionForFilename(name) {
 }
 
 function renderChrome() {
-  fileTree.innerHTML = files.map((file, index) => `
-    <button class="file-item ${index === activeIndex ? "active" : ""}" data-index="${index}">
-      <span class="file-icon ${file.type}">${iconFor(file.type)}</span><span class="file-name">${file.name}</span>
-    </button>`).join("");
+  const folderGroups = [{ id: "", name: "Workspace", collapsed: false }, ...folders];
+  fileTree.innerHTML = folderGroups.map((folder) => {
+    const indexes = files.map((file, index) => ({ file, index }))
+      .filter(({ file }) => (file.folderId || "") === folder.id)
+      .sort((a, b) => Number(b.file.pinned) - Number(a.file.pinned));
+    if (!indexes.length && folder.id) {
+      return `<div class="folder-group"><button class="folder-heading" data-folder-id="${escapeHtml(folder.id)}" data-collapsed="${folder.collapsed}" aria-expanded="${!folder.collapsed}"><span class="folder-chevron">${folder.collapsed ? "›" : "⌄"}</span><span class="folder-symbol">□</span><span>${escapeHtml(folder.name)}</span></button></div>`;
+    }
+    return `<div class="folder-group">
+      ${folder.id ? `<button class="folder-heading" data-folder-id="${escapeHtml(folder.id)}" data-collapsed="${folder.collapsed}" aria-expanded="${!folder.collapsed}"><span class="folder-chevron">${folder.collapsed ? "›" : "⌄"}</span><span class="folder-symbol">□</span><span>${escapeHtml(folder.name)}</span></button>` : ""}
+      <div class="folder-files ${folder.collapsed ? "hidden" : ""}" data-folder-id="${escapeHtml(folder.id)}">
+        ${indexes.map(({ file, index }) => `<button class="file-item ${index === activeIndex ? "active" : ""}" draggable="true" data-index="${index}">
+          <span class="file-icon ${file.type}">${iconFor(file.type)}</span><span class="file-name">${escapeHtml(file.name)}</span><span class="pin-toggle ${file.pinned ? "pinned" : ""}" role="button" tabindex="0" data-pin-index="${index}" aria-label="${file.pinned ? "Unpin" : "Pin"} ${escapeHtml(file.name)}">${file.pinned ? "★" : "☆"}</span>
+        </button>`).join("")}
+      </div>
+    </div>`;
+  }).join("");
+  newFileFolder.innerHTML = `<option value="">Workspace root</option>${folders.map((folder) => `<option value="${escapeHtml(folder.id)}">${escapeHtml(folder.name)}</option>`).join("")}`;
   tabs.innerHTML = openTabs.map((fileIndex) => {
     const file = files[fileIndex];
     return `
@@ -138,6 +159,53 @@ function renderChrome() {
   fileTree.querySelectorAll(".file-item").forEach((item) => {
     item.addEventListener("click", () => openFile(Number(item.dataset.index)));
     item.addEventListener("dblclick", () => beginRename(Number(item.dataset.index), item));
+    item.addEventListener("dragstart", (event) => {
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData("text/plain", item.dataset.index);
+      item.classList.add("dragging");
+    });
+    item.addEventListener("dragend", () => item.classList.remove("dragging"));
+    item.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "move";
+    });
+    item.addEventListener("drop", (event) => {
+      event.preventDefault();
+      moveFile(Number(event.dataTransfer.getData("text/plain")), Number(item.dataset.index));
+    });
+  });
+  fileTree.querySelectorAll(".folder-heading").forEach((heading) => {
+    heading.addEventListener("click", () => {
+      const folder = folders.find((entry) => entry.id === heading.dataset.folderId);
+      if (!folder) return;
+      folder.collapsed = !folder.collapsed;
+      renderChrome();
+      saveWorkspace();
+    });
+    heading.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "move";
+    });
+    heading.addEventListener("drop", (event) => {
+      event.preventDefault();
+      moveFileToFolder(Number(event.dataTransfer.getData("text/plain")), heading.dataset.folderId);
+    });
+  });
+  fileTree.querySelectorAll(".pin-toggle").forEach((pin) => {
+    const togglePin = (event) => {
+      event.stopPropagation();
+      const index = Number(pin.dataset.pinIndex);
+      files[index].pinned = !files[index].pinned;
+      renderChrome();
+      saveWorkspace();
+    };
+    pin.addEventListener("click", togglePin);
+    pin.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        togglePin(event);
+      }
+    });
   });
   tabs.querySelectorAll(".close").forEach((button) => button.addEventListener("click", (event) => {
     event.stopPropagation();
@@ -151,12 +219,50 @@ function renderChrome() {
         event.preventDefault();
         openTab();
       }
+
     });
   });
   const current = files[activeIndex];
   breadcrumbs.innerHTML = current ? `<span>workspace</span><span>›</span><strong>${current.name}</strong>` : "<span>No file open</span>";
   languageStatus.textContent = current ? (current.type === "markdown" ? "Markdown" : current.type === "javascript" ? "JavaScript" : current.type === "css" ? "CSS" : "Plain Text") : "Plain Text";
   updateSaveStatus();
+}
+
+function remapReferences(map) {
+  openTabs = openTabs.map((index) => map[index]).filter((index) => Number.isInteger(index));
+  activeIndex = activeIndex >= 0 ? map[activeIndex] : -1;
+  const nextDirty = new Set();
+  dirtyFiles.forEach((index) => { if (Number.isInteger(map[index])) nextDirty.add(map[index]); });
+  dirtyFiles.clear();
+  nextDirty.forEach((index) => dirtyFiles.add(index));
+  const nextHistory = new Map();
+  editHistory.forEach((history, index) => { if (Number.isInteger(map[index])) nextHistory.set(map[index], history); });
+  editHistory.clear();
+  nextHistory.forEach((history, index) => editHistory.set(index, history));
+}
+
+function moveFile(fromIndex, targetIndex) {
+  if (fromIndex === targetIndex || !files[fromIndex] || !files[targetIndex]) return;
+  const movedFile = files[fromIndex];
+  const targetFolderId = files[targetIndex].folderId || "";
+  const reordered = files.filter((_, index) => index !== fromIndex);
+  const insertAt = reordered.indexOf(files[targetIndex]);
+  movedFile.folderId = targetFolderId;
+  reordered.splice(insertAt, 0, movedFile);
+  const map = [];
+  files.forEach((file, index) => { map[index] = reordered.indexOf(file); });
+  files = reordered;
+  remapReferences(map);
+  renderChrome();
+  saveWorkspace();
+}
+
+function moveFileToFolder(fileIndex, folderId) {
+  if (!files[fileIndex] || (files[fileIndex].folderId || "") === folderId) return;
+  files[fileIndex].folderId = folderId;
+  renderChrome();
+  saveWorkspace();
+  showToast(`Moved ${files[fileIndex].name}`);
 }
 
 function escapeHtml(value) {
@@ -733,13 +839,31 @@ function createNewFile(extension) {
     newFileName.focus();
     return;
   }
-  files.push({ name, type, content });
+  files.push({ name, type, content, folderId: newFileFolder.value, pinned: false });
   openFile(files.length - 1);
   saveWorkspace();
   newFileName.value = "untitled";
   customExtension.value = "";
   newFileMenu.classList.add("hidden");
   newFileButton.setAttribute("aria-expanded", "false");
+}
+
+function createNewFolder() {
+  const name = window.prompt("Folder name");
+  if (name === null) return;
+  const normalizedName = name.trim();
+  if (!normalizedName || /[\\/:*?"<>|]/.test(normalizedName)) {
+    showToast("Enter a valid folder name");
+    return;
+  }
+  if (folders.some((folder) => folder.name.toLowerCase() === normalizedName.toLowerCase())) {
+    showToast("A folder with that name already exists");
+    return;
+  }
+  folders.push({ id: `folder-${Date.now()}`, name: normalizedName, collapsed: false });
+  renderChrome();
+  saveWorkspace();
+  showToast(`${normalizedName} folder created`);
 }
 
 newFileButton.addEventListener("click", (event) => {
@@ -751,6 +875,7 @@ newFileButton.addEventListener("click", (event) => {
     newFileName.select();
   }
 });
+newFolderButton.addEventListener("click", createNewFolder);
 newFileMenu.querySelectorAll(".file-type-option").forEach((option) => option.addEventListener("click", () => {
   createNewFile(option.dataset.extension);
 }));
