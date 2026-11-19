@@ -50,6 +50,9 @@ const undoButton = document.getElementById("undoButton");
 const redoButton = document.getElementById("redoButton");
 const importActivityButton = document.getElementById("importActivityButton");
 const importFileInput = document.getElementById("importFileInput");
+const exportWorkspaceButton = document.getElementById("exportWorkspaceButton");
+const importWorkspaceButton = document.getElementById("importWorkspaceButton");
+const importWorkspaceInput = document.getElementById("importWorkspaceInput");
 const searchActivityButton = document.getElementById("searchActivityButton");
 const explorerContent = document.getElementById("explorerContent");
 const searchView = document.getElementById("searchView");
@@ -85,6 +88,85 @@ function saveWorkspace(clearDirty = false) {
   }));
   if (clearDirty) dirtyFiles.clear();
   updateSaveStatus();
+}
+
+function exportWorkspace() {
+  if (activeIndex >= 0) files[activeIndex].content = editor.value;
+  const backup = {
+    format: "webslate-workspace",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    theme: document.body.dataset.theme,
+    files,
+    folders,
+    openTabs,
+    activeIndex
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+  const objectUrl = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = objectUrl;
+  link.download = `webslate-workspace-${new Date().toISOString().slice(0, 10)}.json`;
+  link.style.display = "none";
+  document.body.appendChild(link);
+  link.click();
+  setTimeout(() => {
+    URL.revokeObjectURL(objectUrl);
+    link.remove();
+  }, 10000);
+  saveWorkspace();
+  showToast("Workspace exported");
+}
+
+function applyImportedWorkspace(backup) {
+  if (!backup || backup.format !== "webslate-workspace" || backup.version !== 1 || !Array.isArray(backup.files) || !Array.isArray(backup.folders)) {
+    throw new Error("Unsupported WebSlate backup");
+  }
+  const importedFolders = backup.folders.filter((folder) => folder && typeof folder.id === "string" && typeof folder.name === "string")
+    .map((folder) => ({ id: folder.id, name: folder.name, collapsed: Boolean(folder.collapsed) }));
+  const folderIds = new Set(importedFolders.map((folder) => folder.id));
+  const importedFiles = backup.files.filter((file) => file && typeof file.name === "string" && typeof file.content === "string")
+    .map((file) => ({
+      name: file.name,
+      type: ["markdown", "javascript", "css", "text"].includes(file.type) ? file.type : typeForExtension(extensionForFilename(file.name)),
+      content: file.content,
+      folderId: folderIds.has(file.folderId) ? file.folderId : "",
+      pinned: Boolean(file.pinned)
+    }));
+  if (!importedFiles.length) throw new Error("Backup contains no files");
+  files = importedFiles;
+  folders = importedFolders;
+  openTabs = Array.isArray(backup.openTabs) ? backup.openTabs.filter((index) => Number.isInteger(index) && index >= 0 && index < files.length) : files.map((_, index) => index);
+  activeIndex = Number.isInteger(backup.activeIndex) && backup.activeIndex >= 0 && backup.activeIndex < files.length ? backup.activeIndex : 0;
+  dirtyFiles.clear();
+  editHistory.clear();
+  files.forEach((file, index) => editHistory.set(index, { entries: [file.content], position: 0, lastEditAt: 0 }));
+  applyTheme(backup.theme === "light" ? "light" : "dark");
+  localStorage.setItem(THEME_KEY, document.body.dataset.theme);
+  editor.value = files[activeIndex].content;
+  previewing = false;
+  splitMode = false;
+  markdownPreview.classList.add("hidden");
+  editorWrap.classList.remove("split-mode");
+  document.getElementById("editorPane").classList.remove("hidden");
+  document.getElementById("previewButton").innerHTML = '<span class="preview-dot"></span> Preview';
+  renderChrome();
+  updateLines();
+  updateCursor();
+  updateHistoryButtons();
+  saveWorkspace(true);
+}
+
+async function importWorkspace(file) {
+  if (!file) return;
+  try {
+    applyImportedWorkspace(JSON.parse(await file.text()));
+    showToast("Workspace imported");
+  } catch (error) {
+    showToast(error.message === "Unsupported WebSlate backup" || error.message === "Backup contains no files" ? error.message : "Unable to read workspace backup");
+  } finally {
+    importWorkspaceInput.value = "";
+  }
 }
 
 function updateSaveStatus() {
@@ -523,6 +605,9 @@ searchActivityButton.addEventListener("click", showSearchView);
 workspaceSearch.addEventListener("input", () => renderSearchResults(workspaceSearch.value));
 importActivityButton.addEventListener("click", () => importFileInput.click());
 importFileInput.addEventListener("change", () => importFiles(importFileInput.files));
+exportWorkspaceButton.addEventListener("click", exportWorkspace);
+importWorkspaceButton.addEventListener("click", () => importWorkspaceInput.click());
+importWorkspaceInput.addEventListener("change", () => importWorkspace(importWorkspaceInput.files[0]));
 
 function markdownToHtml(markdown) {
   const escape = (value) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
