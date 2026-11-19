@@ -215,7 +215,13 @@ function renderChrome() {
   const folderGroups = [{ id: "", name: "Workspace", collapsed: false }, ...folders];
   const folderHeading = (folder) => `<div class="folder-row">
     <button class="folder-heading" data-folder-id="${escapeHtml(folder.id)}" data-collapsed="${folder.collapsed}" aria-expanded="${!folder.collapsed}">
-      <span class="folder-chevron">${folder.collapsed ? "›" : "⌄"}</span><span class="folder-symbol">□</span><span class="folder-label">${escapeHtml(folder.name)}</span>
+      <span class="folder-chevron">${folder.collapsed ? "›" : "⌄"}</span>
+      <svg class="folder-symbol" viewBox="0 0 24 24" aria-hidden="true">
+        ${folder.collapsed
+          ? '<path d="M3.5 6.5h6l2 2h9v9.5h-17z"></path>'
+          : '<path d="M3.5 7.5h6l2 2h9v8.5h-17z"></path><path d="M3.5 10h17l-2.2 8H5.7z"></path>'}
+      </svg>
+      <span class="folder-label">${escapeHtml(folder.name)}</span>
     </button>
     <button class="folder-delete" type="button" data-delete-folder="${escapeHtml(folder.id)}" aria-label="Delete ${escapeHtml(folder.name)}" title="Delete folder">×</button>
   </div>`;

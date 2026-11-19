@@ -174,7 +174,7 @@ svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-lineca
 .folder-heading { display: flex; align-items: center; min-width: 0; flex: 1; height: 27px; padding: 0 7px; gap: 6px; border: 0; border-radius: 4px 0 0 4px; color: var(--soft); background: transparent; font-size: 10px; font-weight: 700; text-align: left; }
 .folder-heading:hover { color: var(--text); background: #1a2631; }
 .folder-chevron { width: 10px; color: var(--muted); font-size: 16px; line-height: 1; }
-.folder-symbol { color: var(--accent); font-size: 13px; }
+.folder-symbol { width: 15px; height: 15px; flex: 0 0 15px; color: var(--accent); fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .folder-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .folder-delete { display: grid; width: 18px; height: 18px; flex: 0 0 18px; place-items: center; margin: 0 4px 0 0; padding: 0; overflow: hidden; border: 0; border-radius: 3px; color: var(--muted); background: transparent; font-size: 14px; font-weight: 400; line-height: 1; opacity: 0; }
 .folder-row:hover .folder-delete, .folder-delete:focus-visible { opacity: 1; }
