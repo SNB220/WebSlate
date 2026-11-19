@@ -213,15 +213,21 @@ function extensionForFilename(name) {
 
 function renderChrome() {
   const folderGroups = [{ id: "", name: "Workspace", collapsed: false }, ...folders];
+  const folderHeading = (folder) => `<div class="folder-row">
+    <button class="folder-heading" data-folder-id="${escapeHtml(folder.id)}" data-collapsed="${folder.collapsed}" aria-expanded="${!folder.collapsed}">
+      <span class="folder-chevron">${folder.collapsed ? "›" : "⌄"}</span><span class="folder-symbol">□</span><span class="folder-label">${escapeHtml(folder.name)}</span>
+    </button>
+    <button class="folder-delete" type="button" data-delete-folder="${escapeHtml(folder.id)}" aria-label="Delete ${escapeHtml(folder.name)}" title="Delete folder">×</button>
+  </div>`;
   fileTree.innerHTML = folderGroups.map((folder) => {
     const indexes = files.map((file, index) => ({ file, index }))
       .filter(({ file }) => (file.folderId || "") === folder.id)
       .sort((a, b) => Number(b.file.pinned) - Number(a.file.pinned));
     if (!indexes.length && folder.id) {
-      return `<div class="folder-group"><button class="folder-heading" data-folder-id="${escapeHtml(folder.id)}" data-collapsed="${folder.collapsed}" aria-expanded="${!folder.collapsed}"><span class="folder-chevron">${folder.collapsed ? "›" : "⌄"}</span><span class="folder-symbol">□</span><span>${escapeHtml(folder.name)}</span></button></div>`;
+      return `<div class="folder-group">${folderHeading(folder)}</div>`;
     }
     return `<div class="folder-group">
-      ${folder.id ? `<button class="folder-heading" data-folder-id="${escapeHtml(folder.id)}" data-collapsed="${folder.collapsed}" aria-expanded="${!folder.collapsed}"><span class="folder-chevron">${folder.collapsed ? "›" : "⌄"}</span><span class="folder-symbol">□</span><span>${escapeHtml(folder.name)}</span></button>` : ""}
+      ${folder.id ? folderHeading(folder) : ""}
       <div class="folder-files ${folder.collapsed ? "hidden" : ""}" data-folder-id="${escapeHtml(folder.id)}">
         ${indexes.map(({ file, index }) => `<button class="file-item ${index === activeIndex ? "active" : ""}" draggable="true" data-index="${index}">
           <span class="file-icon ${file.type}">${iconFor(file.type)}</span><span class="file-name">${escapeHtml(file.name)}</span><span class="pin-toggle ${file.pinned ? "pinned" : ""}" role="button" tabindex="0" data-pin-index="${index}" aria-label="${file.pinned ? "Unpin" : "Pin"} ${escapeHtml(file.name)}">${file.pinned ? "★" : "☆"}</span>
@@ -263,6 +269,19 @@ function renderChrome() {
       folder.collapsed = !folder.collapsed;
       renderChrome();
       saveWorkspace();
+    });
+    fileTree.querySelectorAll(".folder-delete").forEach((deleteButton) => {
+      const removeFolder = (event) => {
+        event.stopPropagation();
+        deleteFolder(deleteButton.dataset.deleteFolder);
+      };
+      deleteButton.addEventListener("click", removeFolder);
+      deleteButton.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          removeFolder(event);
+        }
+      });
     });
     heading.addEventListener("dragover", (event) => {
       event.preventDefault();
@@ -345,6 +364,24 @@ function moveFileToFolder(fileIndex, folderId) {
   renderChrome();
   saveWorkspace();
   showToast(`Moved ${files[fileIndex].name}`);
+}
+
+function deleteFolder(folderId) {
+  const folderIndex = folders.findIndex((folder) => folder.id === folderId);
+  if (folderIndex < 0) return;
+  const folder = folders[folderIndex];
+  const fileCount = files.filter((file) => file.folderId === folderId).length;
+  const message = fileCount
+    ? `Delete "${folder.name}"? Its ${fileCount} ${fileCount === 1 ? "file" : "files"} will move to the workspace root.`
+    : `Delete empty folder "${folder.name}"?`;
+  if (!window.confirm(message)) return;
+  files.forEach((file) => {
+    if (file.folderId === folderId) file.folderId = "";
+  });
+  folders.splice(folderIndex, 1);
+  renderChrome();
+  saveWorkspace();
+  showToast(`${folder.name} folder deleted`);
 }
 
 function escapeHtml(value) {
